@@ -8,6 +8,7 @@
 #include "MinHook/include/MinHook.h"
 #include <iostream>
 #include "dllmain.h"
+#include <thread>   
 
 int NGDifficulty(int RowOffset, float NGMultiplier, int DifficultyLevel);
 
@@ -15,6 +16,9 @@ int DifficultyModule();
 
 int StaticAddressPatcher();
 
+void FPstaminaDrain();
+
+void StaminaHalfCut();
 
 
 tDirectInput8Create oDirectInput8Create;
@@ -44,6 +48,8 @@ DWORD WINAPI MainThread(HMODULE hModule)
     DifficultyModule();
 
     std::cout << "HoodiePatcher - Complete" << std::endl;
+
+    FPstaminaDrain();
 
     return S_OK;
 }
@@ -183,7 +189,6 @@ int DifficultyModule() {
         }
     }
 }
-
 
 int NGDifficulty(int RowOffset, float NGMultiplier, int DifficultyLevel) {
 
@@ -381,3 +386,47 @@ int NGDifficulty(int RowOffset, float NGMultiplier, int DifficultyLevel) {
 
 }
 
+void FPstaminaDrain() {
+	std::cout << "FPstaminaDrain() - Start" << std::endl;
+    std::thread StaminaDebuff(StaminaHalfCut);
+	int Second = 1000;
+	long long BaseB = 0x144768E78;
+	int XA = 0x1F90;
+	while (true) {
+		int* stamina = mlp<int>((void*)BaseB, 0x80, XA, 0x18, 0xF0);
+		unsigned int* maxstamina = mlp<unsigned int>((void*)BaseB, 0x80, XA, 0x18, 0xF4);
+		unsigned int* fp = mlp<unsigned int>((void*)BaseB, 0x80, XA, 0x18, 0xE4);
+		unsigned int* maxfp = mlp<unsigned int>((void*)BaseB, 0x80, XA, 0x18, 0xE8);
+		unsigned int* basemaxfp = mlp<unsigned int>((void*)BaseB, 0x80, XA, 0x18, 0xEC);
+        unsigned int* HeroBaseAddress = mlp<unsigned int>((void*)BaseB, 0x80, XA, 0x18);
+        if (HeroBaseAddress != nullptr) {
+            if (stamina != nullptr) {
+                if (*fp < *basemaxfp) {
+                    if ((int)((double)*stamina - ((double)*maxstamina * 0.40)) > 0) {
+                        std::cout << "looping stamina drain fpgib" << std::endl;
+                        *stamina = (int)((double)*stamina - ((double)*maxstamina * 0.40));
+                        *fp += (byte)5;
+                    }
+                }
+            }
+        }
+	}
+}
+
+void StaminaHalfCut() {
+    std::cout << "StaminaHalfCut() - Start" << std::endl;
+	long long BaseB = 0x144768E78;
+	int XA = 0x1F90;
+	while (true) {
+        unsigned int* HeroBaseAddress = mlp<unsigned int>((void*)BaseB, 0x80, XA, 0x18);
+		int* stamina = mlp<int>((void*)BaseB, 0x80, XA, 0x18, 0xF0);
+		int* maxstamina = mlp<int>((void*)BaseB, 0x80, XA, 0x18, 0xF4);
+        if (HeroBaseAddress != nullptr) {
+            if (stamina != nullptr) {
+                if (*stamina > (*maxstamina / 2)) {
+                    *stamina = (*maxstamina / 2);
+                }
+            }
+        }
+	}
+}
