@@ -9,6 +9,8 @@
 #include <iostream>
 #include "dllmain.h"
 #include <thread>   
+#include <string>
+#include "PointersDef.h"
 
 int NGDifficulty(int RowOffset, float NGMultiplier, int DifficultyLevel);
 
@@ -16,9 +18,11 @@ int DifficultyModule();
 
 int StaticAddressPatcher();
 
-void FPstaminaDrain();
+void FPstaminaDrain(int* stamina, unsigned int* maxstamina, unsigned int* fp, unsigned int* basemaxfp);
 
-void StaminaHalfCut();
+void MainLoop();
+
+unsigned int* GetPointer(bool PointerValid, int PointerName);
 
 
 tDirectInput8Create oDirectInput8Create;
@@ -49,7 +53,7 @@ DWORD WINAPI MainThread(HMODULE hModule)
 
 	std::cout << "HoodiePatcher - Complete" << std::endl;
 
-	FPstaminaDrain();
+	MainLoop();
 
 	return S_OK;
 }
@@ -148,6 +152,58 @@ int StaticAddressPatcher() {
 
 }
 
+unsigned int* GetPointer(bool PointerValid, int PointerName) {
+	long long BaseB = 0x144768E78;
+	long long BaseA = 0x144740178;
+	int XA = 0x1F90;
+	unsigned int* Address = nullptr;
+	if (PointerName == PointerPlayerStatBaseAddress) {
+		while (Address == nullptr) {
+			Address = mlp<unsigned int>((void*)BaseB, 0x80, XA, 0x18);
+			if (PointerValid == false) { break; }
+		}
+	}
+	else if (PointerName == PointerPlayerStamina) {
+		while (Address == nullptr) {
+			Address = mlp<unsigned int>((void*)BaseB, 0x80, XA, 0x18, 0xF0);
+			if (PointerValid == false) { break; }
+		}
+	}
+	else if (PointerName == PointerPlayerMaxStamina) {
+		while (Address == nullptr) {
+			Address = mlp<unsigned int>((void*)BaseB, 0x80, XA, 0x18, 0xF4);
+			if (PointerValid == false) { break; }
+		}
+	}
+	else if (PointerName == PointerPlayerFocusPoints) {
+		while (Address == nullptr) {
+			Address = mlp<unsigned int>((void*)BaseB, 0x80, XA, 0x18, 0xE4);
+			if (PointerValid == false) { break; }
+		}
+	}
+	else if (PointerName == PointerPlayerMaxFocusPoints) {
+		while (Address == nullptr) {
+			Address = mlp<unsigned int>((void*)BaseB, 0x80, XA, 0x18, 0xEC);
+			if (PointerValid == false) { break; }
+		}
+	}
+	else if (PointerName == PointerClearCountCorrectParam) {
+		while (Address == nullptr) {
+			Address = mlp<unsigned int>((void*)0x144782838, 0x17C8, 0x68, 0x68, 0x0);
+			if (PointerValid == false) { break; }
+		}
+	}
+	else if (PointerName == PointerPlayerStaminaLevel) {
+		while (Address == nullptr) {
+			Address = mlp<unsigned int>((void*)BaseA, 0x10, 0x4C);
+			if (PointerValid == false) { break; }
+		}
+	}
+
+	return Address;
+
+}
+
 int DifficultyModule() {
 
 	int NG0 = 0x100;
@@ -163,222 +219,243 @@ int DifficultyModule() {
 	int DifficultyLevel = GetPrivateProfileIntW(L"Difficulty", L"DifficultyLevel", 0, L".\\HoodiePatcher.ini");
 	std::cout << "Difficulty level = " << DifficultyLevel << std::endl << std::endl;
 
-	while (true) {
-		unsigned int* ClearCountCorrectParam = mlp<unsigned int>((void*)0x144782838, 0x17C8, 0x68, 0x68, 0x0);
-		if (ClearCountCorrectParam != nullptr) {
+	std::cout << "NG0 Start" << std::endl;
+	NGDifficulty(NG0, 1.0F, DifficultyLevel);
+	std::cout << "NG1 Start" << std::endl;
+	NGDifficulty(NG1, 1.20F, DifficultyLevel);
+	std::cout << "NG2 Start" << std::endl;
+	NGDifficulty(NG2, 1.30F, DifficultyLevel);
+	std::cout << "NG3 Start" << std::endl;
+	NGDifficulty(NG3, 1.40F, DifficultyLevel);
+	std::cout << "NG4 Start" << std::endl;
+	NGDifficulty(NG4, 1.50F, DifficultyLevel);
+	std::cout << "NG5 Start" << std::endl;
+	NGDifficulty(NG5, 1.60F, DifficultyLevel);
+	std::cout << "NG6 Start" << std::endl;
+	NGDifficulty(NG6, 1.70F, DifficultyLevel);
+	std::cout << "NG7 Start" << std::endl;
+	NGDifficulty(NG7, 1.80F, DifficultyLevel);
 
-			std::cout << "NG0 Start" << std::endl;
-			NGDifficulty(NG0, 1.0F, DifficultyLevel);
-			std::cout << "NG1 Start" << std::endl;
-			NGDifficulty(NG1, 1.20F, DifficultyLevel);
-			std::cout << "NG2 Start" << std::endl;
-			NGDifficulty(NG2, 1.30F, DifficultyLevel);
-			std::cout << "NG3 Start" << std::endl;
-			NGDifficulty(NG3, 1.40F, DifficultyLevel);
-			std::cout << "NG4 Start" << std::endl;
-			NGDifficulty(NG4, 1.50F, DifficultyLevel);
-			std::cout << "NG5 Start" << std::endl;
-			NGDifficulty(NG5, 1.60F, DifficultyLevel);
-			std::cout << "NG6 Start" << std::endl;
-			NGDifficulty(NG6, 1.70F, DifficultyLevel);
-			std::cout << "NG7 Start" << std::endl;
-			NGDifficulty(NG7, 1.80F, DifficultyLevel);
-
-			std::cout << "Difficulty Module End" << std::endl << std::endl;
-			return true;
-		}
-	}
+	std::cout << "Difficulty Module End" << std::endl << std::endl;
+	return true;
 }
 
 int NGDifficulty(int RowOffset, float NGMultiplier, int DifficultyLevel) {
 
-	unsigned int* ClearCountCorrectParam = mlp<unsigned int>((void*)0x144782838, 0x17C8, 0x68, 0x68, 0x0);
+	unsigned int* ClearCountCorrectParam = GetPointer(true, PointerClearCountCorrectParam);
 
 	float OffenseMultiplier = ((float)GetPrivateProfileIntW(L"Difficulty", L"EnemyOffenseMultiplier", 100, L".\\HoodiePatcher.ini") / (float)100);
 	float DefenseMultiplier = ((float)GetPrivateProfileIntW(L"Difficulty", L"EnemyDefenseMultiplier", 100, L".\\HoodiePatcher.ini") / (float)100);
 
-	char* NG = ((char*)ClearCountCorrectParam + RowOffset);
+	byte* NG = ((byte*)ClearCountCorrectParam + RowOffset);
+	byte float32 = (byte)0x4;
 	std::cout << "         ClearCountCorrectParam Pointer -> " << std::hex << (unsigned int*)ClearCountCorrectParam << std::endl;
 	std::cout << "                         NG Row Pointer -> " << std::hex << (unsigned int*)NG << std::endl;
 	std::cout << "     Offset from ClearCountCorrectParam -> " << std::hex << ((char*)NG - (char*)ClearCountCorrectParam) << std::endl << std::endl;
 
-	char* MaxHP = ((char*)NG + 0x0);
-	char* MaxFP = ((char*)NG + 0x4);
-	char* MaxStamina = ((char*)NG + 0x8);
-	char* DmgPhys = ((char*)NG + 0xC);
-	char* DmgSlash = ((char*)NG + 0x10);
-	char* DmgStrike = ((char*)NG + 0x14);
-	char* DmgThrust = ((char*)NG + 0x18);
-	char* DmgStandard = ((char*)NG + 0x1C);
-	char* DmgMagic = ((char*)NG + 0x20);
-	char* DmgFire = ((char*)NG + 0x24);
-	char* DmgLightning = ((char*)NG + 0x28);
-	char* DmgDark = ((char*)NG + 0x2C);
-	char* DefPhys = ((char*)NG + 0x30);
-	char* DefMagic = ((char*)NG + 0x34);
-	char* DefFire = ((char*)NG + 0x38);
-	char* DefLightning = ((char*)NG + 0x3C);
-	char* DefDark = ((char*)NG + 0x40);
-	char* DmgStamina = ((char*)NG + 0x44);
-	char* SoulGainMult = ((char*)NG + 0x48);
-	char* ResistPoison = ((char*)NG + 0x4C);
-	char* ResistToxic = ((char*)NG + 0x50);
-	char* ResistBleed = ((char*)NG + 0x54);
-	char* ResistCurse = ((char*)NG + 0x58);
-	char* ResistFrost = ((char*)NG + 0x5C);
-	char* HpRecover = ((char*)NG + 0x60);
-	char* PlayerPoiseDmgMultiplier = ((char*)NG + 0x64);
-	char* subHpRecover = ((char*)NG + 0x68);
+	float* MaxHP = (float*)NG;
+	NG += float32;
+	float* MaxFP = (float*)NG;
+	NG += float32;
+	float* MaxStamina = (float*)NG;
+	NG += float32;
+	float* DmgPhys = (float*)NG;
+	NG += float32;
+	float* DmgSlash = (float*)NG;
+	NG += float32;
+	float* DmgStrike = (float*)NG;
+	NG += float32;
+	float* DmgThrust = (float*)NG;
+	NG += float32;
+	float* DmgStandard = (float*)NG;
+	NG += float32;
+	float* DmgMagic = (float*)NG;
+	NG += float32;
+	float* DmgFire = (float*)NG;
+	NG += float32;
+	float* DmgLightning = (float*)NG;
+	NG += float32;
+	float* DmgDark = (float*)NG;
+	NG += float32;
+	float* DefPhys = (float*)NG;
+	NG += float32;
+	float* DefMagic = (float*)NG;
+	NG += float32;
+	float* DefFire = (float*)NG;
+	NG += float32;
+	float* DefLightning = (float*)NG;
+	NG += float32;
+	float* DefDark = (float*)NG;
+	NG += float32;
+	float* DmgStamina = (float*)NG;
+	NG += float32;
+	float* SoulGainMult = (float*)NG;
+	NG += float32;
+	float* ResistPoison = (float*)NG;
+	NG += float32;
+	float* ResistToxic = (float*)NG;
+	NG += float32;
+	float* ResistBleed = (float*)NG;
+	NG += float32;
+	float* ResistCurse = (float*)NG;
+	NG += float32;
+	float* ResistFrost = (float*)NG;
+	NG += float32;
+	float* HpRecover = (float*)NG;
+	NG += float32;
+	float* PlayerPoiseDmgMultiplier = (float*)NG;
+	NG += float32;
+	float* subHpRecover = (float*)NG;
 
 	switch (DifficultyLevel) {
 	case 1: //Vanilla - NG+0 - equivalent
-		*(float*)MaxHP = (float)(0.80F * DefenseMultiplier * NGMultiplier);
-		*(float*)MaxFP = (float)1.0F;
-		*(float*)MaxStamina = (float)(0.80F * OffenseMultiplier * NGMultiplier);
-		*(float*)DmgPhys = (float)(0.80F * OffenseMultiplier * NGMultiplier);
-		*(float*)DmgSlash = (float)1.0F;
-		*(float*)DmgStrike = (float)1.0F;
-		*(float*)DmgThrust = (float)1.0F;
-		*(float*)DmgStandard = (float)(0.80F * OffenseMultiplier * NGMultiplier);
-		*(float*)DmgMagic = (float)(0.80F * OffenseMultiplier * NGMultiplier);
-		*(float*)DmgFire = (float)(0.80F * OffenseMultiplier * NGMultiplier);
-		*(float*)DmgLightning = (float)(0.80F * OffenseMultiplier * NGMultiplier);
-		*(float*)DmgDark = (float)(0.80F * OffenseMultiplier * NGMultiplier);
-		*(float*)DefPhys = (float)(0.80F * DefenseMultiplier * NGMultiplier);
-		*(float*)DefMagic = (float)(0.80F * DefenseMultiplier * NGMultiplier);
-		*(float*)DefFire = (float)(0.80F * DefenseMultiplier * NGMultiplier);
-		*(float*)DefLightning = (float)(0.80F * DefenseMultiplier * NGMultiplier);
-		*(float*)DefDark = (float)(0.80F * DefenseMultiplier * NGMultiplier);
-		*(float*)DmgStamina = (float)(0.80F * OffenseMultiplier * NGMultiplier);
-		*(float*)SoulGainMult = (float)(0.80F * (((OffenseMultiplier + DefenseMultiplier) / 2.0F) * NGMultiplier));
-		*(float*)ResistPoison = (float)(0.80F * ((DefenseMultiplier + NGMultiplier) / 2.0f));
-		*(float*)ResistToxic = (float)(0.80F * ((DefenseMultiplier + NGMultiplier) / 2.0f));
-		*(float*)ResistBleed = (float)(0.80F * ((DefenseMultiplier + NGMultiplier) / 2.0f));
-		*(float*)ResistCurse = (float)(0.80F * ((DefenseMultiplier + NGMultiplier) / 2.0f));
-		*(float*)ResistFrost = (float)(0.80F * ((DefenseMultiplier + NGMultiplier) / 2.0f));
-		*(float*)HpRecover = (float)1.0F;
-		*(float*)PlayerPoiseDmgMultiplier = (float)((1.2F * (1.0F / DefenseMultiplier)) * (1.0F / NGMultiplier));
-		*(float*)subHpRecover = (float)1.0F;
+		*MaxHP = (float)(0.80F * DefenseMultiplier * NGMultiplier);
+		*MaxFP = (float)1.0F;
+		*MaxStamina = (float)(0.80F * OffenseMultiplier * NGMultiplier);
+		*DmgPhys = (float)(0.80F * OffenseMultiplier * NGMultiplier);
+		*DmgSlash = (float)1.0F;
+		*DmgStrike = (float)1.0F;
+		*DmgThrust = (float)1.0F;
+		*DmgStandard = (float)(0.80F * OffenseMultiplier * NGMultiplier);
+		*DmgMagic = (float)(0.80F * OffenseMultiplier * NGMultiplier);
+		*DmgFire = (float)(0.80F * OffenseMultiplier * NGMultiplier);
+		*DmgLightning = (float)(0.80F * OffenseMultiplier * NGMultiplier);
+		*DmgDark = (float)(0.80F * OffenseMultiplier * NGMultiplier);
+		*DefPhys = (float)(0.80F * DefenseMultiplier * NGMultiplier);
+		*DefMagic = (float)(0.80F * DefenseMultiplier * NGMultiplier);
+		*DefFire = (float)(0.80F * DefenseMultiplier * NGMultiplier);
+		*DefLightning = (float)(0.80F * DefenseMultiplier * NGMultiplier);
+		*DefDark = (float)(0.80F * DefenseMultiplier * NGMultiplier);
+		*DmgStamina = (float)(0.80F * OffenseMultiplier * NGMultiplier);
+		*SoulGainMult = (float)(0.80F * (((OffenseMultiplier + DefenseMultiplier) / 2.0F) * NGMultiplier));
+		*ResistPoison = (float)(0.80F * ((DefenseMultiplier + NGMultiplier) / 2.0f));
+		*ResistToxic = (float)(0.80F * ((DefenseMultiplier + NGMultiplier) / 2.0f));
+		*ResistBleed = (float)(0.80F * ((DefenseMultiplier + NGMultiplier) / 2.0f));
+		*ResistCurse = (float)(0.80F * ((DefenseMultiplier + NGMultiplier) / 2.0f));
+		*ResistFrost = (float)(0.80F * ((DefenseMultiplier + NGMultiplier) / 2.0f));
+		*HpRecover = (float)1.0F;
+		*PlayerPoiseDmgMultiplier = (float)((1.2F * (1.0F / DefenseMultiplier)) * (1.0F / NGMultiplier));
+		*subHpRecover = (float)1.0F;
 		break;
 	case 2: //Vanilla - NG+1 - equivalent
-		*(float*)MaxHP = (float)(1.0F * DefenseMultiplier * NGMultiplier);
-		*(float*)MaxFP = (float)1.0F;
-		*(float*)MaxStamina = (float)(1.0F * OffenseMultiplier * NGMultiplier);
-		*(float*)DmgPhys = (float)(1.0F * OffenseMultiplier * NGMultiplier);
-		*(float*)DmgSlash = (float)1.0F;
-		*(float*)DmgStrike = (float)1.0F;
-		*(float*)DmgThrust = (float)1.0F;
-		*(float*)DmgStandard = (float)(1.0F * OffenseMultiplier * NGMultiplier);
-		*(float*)DmgMagic = (float)(1.0F * OffenseMultiplier * NGMultiplier);
-		*(float*)DmgFire = (float)(1.0F * OffenseMultiplier * NGMultiplier);
-		*(float*)DmgLightning = (float)(1.0F * OffenseMultiplier * NGMultiplier);
-		*(float*)DmgDark = (float)(1.0F * OffenseMultiplier * NGMultiplier);
-		*(float*)DefPhys = (float)(1.0F * DefenseMultiplier * NGMultiplier);
-		*(float*)DefMagic = (float)(1.0F * DefenseMultiplier * NGMultiplier);
-		*(float*)DefFire = (float)(1.0F * DefenseMultiplier * NGMultiplier);
-		*(float*)DefLightning = (float)(1.0F * DefenseMultiplier * NGMultiplier);
-		*(float*)DefDark = (float)(1.0F * DefenseMultiplier * NGMultiplier);
-		*(float*)DmgStamina = (float)(1.0F * OffenseMultiplier * NGMultiplier);
-		*(float*)SoulGainMult = (float)(1.0F * (((OffenseMultiplier + DefenseMultiplier) / 2.0F) * NGMultiplier));
-		*(float*)ResistPoison = (float)(1.0F * ((DefenseMultiplier + NGMultiplier) / 2.0f));
-		*(float*)ResistToxic = (float)(1.0F * ((DefenseMultiplier + NGMultiplier) / 2.0f));
-		*(float*)ResistBleed = (float)(1.0F * ((DefenseMultiplier + NGMultiplier) / 2.0f));
-		*(float*)ResistCurse = (float)(1.0F * ((DefenseMultiplier + NGMultiplier) / 2.0f));
-		*(float*)ResistFrost = (float)(1.0F * ((DefenseMultiplier + NGMultiplier) / 2.0f));
-		*(float*)HpRecover = (float)1.0F;
-		*(float*)PlayerPoiseDmgMultiplier = (float)((1.0F * (1.0F / DefenseMultiplier)) * (1.0F / NGMultiplier));
-		*(float*)subHpRecover = (float)1.0F;
+		*MaxHP = (float)(1.0F * DefenseMultiplier * NGMultiplier);
+		*MaxFP = (float)1.0F;
+		*MaxStamina = (float)(1.0F * OffenseMultiplier * NGMultiplier);
+		*DmgPhys = (float)(1.0F * OffenseMultiplier * NGMultiplier);
+		*DmgSlash = (float)1.0F;
+		*DmgStrike = (float)1.0F;
+		*DmgThrust = (float)1.0F;
+		*DmgStandard = (float)(1.0F * OffenseMultiplier * NGMultiplier);
+		*DmgMagic = (float)(1.0F * OffenseMultiplier * NGMultiplier);
+		*DmgFire = (float)(1.0F * OffenseMultiplier * NGMultiplier);
+		*DmgLightning = (float)(1.0F * OffenseMultiplier * NGMultiplier);
+		*DmgDark = (float)(1.0F * OffenseMultiplier * NGMultiplier);
+		*DefPhys = (float)(1.0F * DefenseMultiplier * NGMultiplier);
+		*DefMagic = (float)(1.0F * DefenseMultiplier * NGMultiplier);
+		*DefFire = (float)(1.0F * DefenseMultiplier * NGMultiplier);
+		*DefLightning = (float)(1.0F * DefenseMultiplier * NGMultiplier);
+		*DefDark = (float)(1.0F * DefenseMultiplier * NGMultiplier);
+		*DmgStamina = (float)(1.0F * OffenseMultiplier * NGMultiplier);
+		*SoulGainMult = (float)(1.0F * (((OffenseMultiplier + DefenseMultiplier) / 2.0F) * NGMultiplier));
+		*ResistPoison = (float)(1.0F * ((DefenseMultiplier + NGMultiplier) / 2.0f));
+		*ResistToxic = (float)(1.0F * ((DefenseMultiplier + NGMultiplier) / 2.0f));
+		*ResistBleed = (float)(1.0F * ((DefenseMultiplier + NGMultiplier) / 2.0f));
+		*ResistCurse = (float)(1.0F * ((DefenseMultiplier + NGMultiplier) / 2.0f));
+		*ResistFrost = (float)(1.0F * ((DefenseMultiplier + NGMultiplier) / 2.0f));
+		*HpRecover = (float)1.0F;
+		*PlayerPoiseDmgMultiplier = (float)((1.0F * (1.0F / DefenseMultiplier)) * (1.0F / NGMultiplier));
+		*subHpRecover = (float)1.0F;
 		break;
 	case 3: //Vanilla - NG+4 - Equivalent
-		*(float*)MaxHP = (float)(1.2F * DefenseMultiplier * NGMultiplier);
-		*(float*)MaxFP = (float)1.0F;
-		*(float*)MaxStamina = (float)(1.2F * OffenseMultiplier * NGMultiplier);
-		*(float*)DmgPhys = (float)(1.2F * OffenseMultiplier * NGMultiplier);
-		*(float*)DmgSlash = (float)1.0F;
-		*(float*)DmgStrike = (float)1.0F;
-		*(float*)DmgThrust = (float)1.0F;
-		*(float*)DmgStandard = (float)(1.2F * OffenseMultiplier * NGMultiplier);
-		*(float*)DmgMagic = (float)(1.2F * OffenseMultiplier * NGMultiplier);
-		*(float*)DmgFire = (float)(1.2F * OffenseMultiplier * NGMultiplier);
-		*(float*)DmgLightning = (float)(1.2F * OffenseMultiplier * NGMultiplier);
-		*(float*)DmgDark = (float)(1.2F * OffenseMultiplier * NGMultiplier);
-		*(float*)DefPhys = (float)(1.1F * DefenseMultiplier * NGMultiplier);
-		*(float*)DefMagic = (float)(1.1F * DefenseMultiplier * NGMultiplier);
-		*(float*)DefFire = (float)(1.1F * DefenseMultiplier * NGMultiplier);
-		*(float*)DefLightning = (float)(1.1F * DefenseMultiplier * NGMultiplier);
-		*(float*)DefDark = (float)(1.1F * DefenseMultiplier * NGMultiplier);
-		*(float*)DmgStamina = (float)(1.6F * OffenseMultiplier * NGMultiplier);
-		*(float*)SoulGainMult = (float)(1.2F * (((OffenseMultiplier + DefenseMultiplier) / 2.0F) * NGMultiplier));
-		*(float*)ResistPoison = (float)(1.045F * ((DefenseMultiplier + NGMultiplier) / 2.0f));
-		*(float*)ResistToxic = (float)(1.045F * ((DefenseMultiplier + NGMultiplier) / 2.0f));
-		*(float*)ResistBleed = (float)(1.045F * ((DefenseMultiplier + NGMultiplier) / 2.0f));
-		*(float*)ResistCurse = (float)(1.045F * ((DefenseMultiplier + NGMultiplier) / 2.0f));
-		*(float*)ResistFrost = (float)(1.045F * ((DefenseMultiplier + NGMultiplier) / 2.0f));
-		*(float*)HpRecover = (float)1.0F;
-		*(float*)PlayerPoiseDmgMultiplier = (float)((0.85F * (1.0F / DefenseMultiplier)) * (1.0F / NGMultiplier));
-		*(float*)subHpRecover = (float)1.0F;
+		*MaxHP = (float)(1.2F * DefenseMultiplier * NGMultiplier);
+		*MaxFP = (float)1.0F;
+		*MaxStamina = (float)(1.2F * OffenseMultiplier * NGMultiplier);
+		*DmgPhys = (float)(1.2F * OffenseMultiplier * NGMultiplier);
+		*DmgSlash = (float)1.0F;
+		*DmgStrike = (float)1.0F;
+		*DmgThrust = (float)1.0F;
+		*DmgStandard = (float)(1.2F * OffenseMultiplier * NGMultiplier);
+		*DmgMagic = (float)(1.2F * OffenseMultiplier * NGMultiplier);
+		*DmgFire = (float)(1.2F * OffenseMultiplier * NGMultiplier);
+		*DmgLightning = (float)(1.2F * OffenseMultiplier * NGMultiplier);
+		*DmgDark = (float)(1.2F * OffenseMultiplier * NGMultiplier);
+		*DefPhys = (float)(1.1F * DefenseMultiplier * NGMultiplier);
+		*DefMagic = (float)(1.1F * DefenseMultiplier * NGMultiplier);
+		*DefFire = (float)(1.1F * DefenseMultiplier * NGMultiplier);
+		*DefLightning = (float)(1.1F * DefenseMultiplier * NGMultiplier);
+		*DefDark = (float)(1.1F * DefenseMultiplier * NGMultiplier);
+		*DmgStamina = (float)(1.6F * OffenseMultiplier * NGMultiplier);
+		*SoulGainMult = (float)(1.2F * (((OffenseMultiplier + DefenseMultiplier) / 2.0F) * NGMultiplier));
+		*ResistPoison = (float)(1.045F * ((DefenseMultiplier + NGMultiplier) / 2.0f));
+		*ResistToxic = (float)(1.045F * ((DefenseMultiplier + NGMultiplier) / 2.0f));
+		*ResistBleed = (float)(1.045F * ((DefenseMultiplier + NGMultiplier) / 2.0f));
+		*ResistCurse = (float)(1.045F * ((DefenseMultiplier + NGMultiplier) / 2.0f));
+		*ResistFrost = (float)(1.045F * ((DefenseMultiplier + NGMultiplier) / 2.0f));
+		*HpRecover = (float)1.0F;
+		*PlayerPoiseDmgMultiplier = (float)((0.85F * (1.0F / DefenseMultiplier)) * (1.0F / NGMultiplier));
+		*subHpRecover = (float)1.0F;
 		break;
 	case 4: //Vanilla - NG+7 - Equivalent
-		*(float*)MaxHP = (float)(1.4F * DefenseMultiplier * NGMultiplier);
-		*(float*)MaxFP = (float)1.0F;
-		*(float*)MaxStamina = (float)(1.275F * OffenseMultiplier * NGMultiplier);
-		*(float*)DmgPhys = (float)(1.450F * OffenseMultiplier * NGMultiplier);
-		*(float*)DmgSlash = (float)1.0F;
-		*(float*)DmgStrike = (float)1.0F;
-		*(float*)DmgThrust = (float)1.0F;
-		*(float*)DmgStandard = (float)(1.45F * OffenseMultiplier * NGMultiplier);
-		*(float*)DmgMagic = (float)(1.45F * OffenseMultiplier * NGMultiplier);
-		*(float*)DmgFire = (float)(1.45F * OffenseMultiplier * NGMultiplier);
-		*(float*)DmgLightning = (float)(1.45F * OffenseMultiplier * NGMultiplier);
-		*(float*)DmgDark = (float)(1.45F * OffenseMultiplier * NGMultiplier);
-		*(float*)DefPhys = (float)(1.3F * DefenseMultiplier * NGMultiplier);
-		*(float*)DefMagic = (float)(1.3F * DefenseMultiplier * NGMultiplier);
-		*(float*)DefFire = (float)(1.3F * DefenseMultiplier * NGMultiplier);
-		*(float*)DefLightning = (float)(1.3F * DefenseMultiplier * NGMultiplier);
-		*(float*)DefDark = (float)(1.3F * DefenseMultiplier * NGMultiplier);
-		*(float*)DmgStamina = (float)(1.9F * OffenseMultiplier * NGMultiplier);
-		*(float*)SoulGainMult = (float)(1.275F * (((OffenseMultiplier + DefenseMultiplier) / 2.0F) * NGMultiplier));
-		*(float*)ResistPoison = (float)(1.09F * ((DefenseMultiplier + NGMultiplier) / 2.0f));
-		*(float*)ResistToxic = (float)(1.09F * ((DefenseMultiplier + NGMultiplier) / 2.0f));
-		*(float*)ResistBleed = (float)(1.09F * ((DefenseMultiplier + NGMultiplier) / 2.0f));
-		*(float*)ResistCurse = (float)(1.09F * ((DefenseMultiplier + NGMultiplier) / 2.0f));
-		*(float*)ResistFrost = (float)(1.09F * ((DefenseMultiplier + NGMultiplier) / 2.0f));
-		*(float*)HpRecover = (float)1.0F;
-		*(float*)PlayerPoiseDmgMultiplier = (float)((0.6F * (1.0F / DefenseMultiplier)) * (1.0F / NGMultiplier));
-		*(float*)subHpRecover = (float)1.0F;
+		*MaxHP = (float)(1.4F * DefenseMultiplier * NGMultiplier);
+		*MaxFP = (float)1.0F;
+		*MaxStamina = (float)(1.275F * OffenseMultiplier * NGMultiplier);
+		*DmgPhys = (float)(1.450F * OffenseMultiplier * NGMultiplier);
+		*DmgSlash = (float)1.0F;
+		*DmgStrike = (float)1.0F;
+		*DmgThrust = (float)1.0F;
+		*DmgStandard = (float)(1.45F * OffenseMultiplier * NGMultiplier);
+		*DmgMagic = (float)(1.45F * OffenseMultiplier * NGMultiplier);
+		*DmgFire = (float)(1.45F * OffenseMultiplier * NGMultiplier);
+		*DmgLightning = (float)(1.45F * OffenseMultiplier * NGMultiplier);
+		*DmgDark = (float)(1.45F * OffenseMultiplier * NGMultiplier);
+		*DefPhys = (float)(1.3F * DefenseMultiplier * NGMultiplier);
+		*DefMagic = (float)(1.3F * DefenseMultiplier * NGMultiplier);
+		*DefFire = (float)(1.3F * DefenseMultiplier * NGMultiplier);
+		*DefLightning = (float)(1.3F * DefenseMultiplier * NGMultiplier);
+		*DefDark = (float)(1.3F * DefenseMultiplier * NGMultiplier);
+		*DmgStamina = (float)(1.9F * OffenseMultiplier * NGMultiplier);
+		*SoulGainMult = (float)(1.275F * (((OffenseMultiplier + DefenseMultiplier) / 2.0F) * NGMultiplier));
+		*ResistPoison = (float)(1.09F * ((DefenseMultiplier + NGMultiplier) / 2.0f));
+		*ResistToxic = (float)(1.09F * ((DefenseMultiplier + NGMultiplier) / 2.0f));
+		*ResistBleed = (float)(1.09F * ((DefenseMultiplier + NGMultiplier) / 2.0f));
+		*ResistCurse = (float)(1.09F * ((DefenseMultiplier + NGMultiplier) / 2.0f));
+		*ResistFrost = (float)(1.09F * ((DefenseMultiplier + NGMultiplier) / 2.0f));
+		*HpRecover = (float)1.0F;
+		*PlayerPoiseDmgMultiplier = (float)((0.6F * (1.0F / DefenseMultiplier)) * (1.0F / NGMultiplier));
+		*subHpRecover = (float)1.0F;
 		break;
 	default:
 		std::cout << "Difficulty Settings Disabled" << std::endl << std::endl;
 		return false;
 	}
 
-	std::cout << "                Enemy Max HP Multiplier -> " << *(float*)MaxHP << std::endl;
-	std::cout << "                Enemy Max FP Multiplier -> " << *(float*)MaxFP << std::endl;
-	std::cout << "           Enemy Max Stamina Multiplier -> " << *(float*)MaxStamina << std::endl;
-	std::cout << "       Enemy Physical Damage Multiplier -> " << *(float*)DmgPhys << std::endl;
-	std::cout << "          Enemy Damage Slash Multiplier -> " << *(float*)DmgSlash << std::endl;
-	std::cout << "          Enemy Damage Blunt Multiplier -> " << *(float*)DmgStrike << std::endl;
-	std::cout << "         Enemy Damage Thrust Multiplier -> " << *(float*)DmgThrust << std::endl;
-	std::cout << "       Enemy Damage Standard Multiplier -> " << *(float*)DmgStandard << std::endl;
-	std::cout << "          Enemy Damage Magic Multiplier -> " << *(float*)DmgMagic << std::endl;
-	std::cout << "           Enemy Damage Fire Multiplier -> " << *(float*)DmgFire << std::endl;
-	std::cout << "      Enemy Damage Lightning Multiplier -> " << *(float*)DmgLightning << std::endl;
-	std::cout << "           Enemy Damage Dark Multiplier -> " << *(float*)DmgDark << std::endl;
-	std::cout << "      Enemy Defense Physical Multiplier -> " << *(float*)DefPhys << std::endl;
-	std::cout << "         Enemy Defense Magic Multiplier -> " << *(float*)DefMagic << std::endl;
-	std::cout << "          Enemy Defense Fire Multiplier -> " << *(float*)DefFire << std::endl;
-	std::cout << "     Enemy Defense Lightning Multiplier -> " << *(float*)DefLightning << std::endl;
-	std::cout << "          Enemy Defense Dark Multiplier -> " << *(float*)DefDark << "\n";
-	std::cout << "        Enemy Damage Stamina Multiplier -> " << *(float*)DmgStamina << std::endl;
-	std::cout << "            Player Gain Soul Multiplier -> " << *(float*)SoulGainMult << std::endl;
-	std::cout << "     Enemy Resistance Poison Multiplier -> " << *(float*)ResistPoison << std::endl;
-	std::cout << "      Enemy Resistance Toxic Multiplier -> " << *(float*)ResistToxic << std::endl;
-	std::cout << "      Enemy Resistance Bleed Multiplier -> " << *(float*)ResistBleed << std::endl;
-	std::cout << "      Enemy Resistance Curse Multiplier -> " << *(float*)ResistCurse << std::endl;
-	std::cout << "      Enemy Resistance Frost Multiplier -> " << *(float*)ResistFrost << std::endl;
-	std::cout << "           Unknown-HpRecover Multiplier -> " << *(float*)HpRecover << std::endl;
-	std::cout << "Player VS Enemy Damage Poise Multiplier -> " << *(float*)PlayerPoiseDmgMultiplier << std::endl;
-	std::cout << "        Unknown-subHpRecover Multiplier -> " << *(float*)subHpRecover << std::endl;
+	std::cout << "                Enemy Max HP Multiplier -> " << *MaxHP << std::endl;
+	std::cout << "                Enemy Max FP Multiplier -> " << *MaxFP << std::endl;
+	std::cout << "           Enemy Max Stamina Multiplier -> " << *MaxStamina << std::endl;
+	std::cout << "       Enemy Physical Damage Multiplier -> " << *DmgPhys << std::endl;
+	std::cout << "          Enemy Damage Slash Multiplier -> " << *DmgSlash << std::endl;
+	std::cout << "          Enemy Damage Blunt Multiplier -> " << *DmgStrike << std::endl;
+	std::cout << "         Enemy Damage Thrust Multiplier -> " << *DmgThrust << std::endl;
+	std::cout << "       Enemy Damage Standard Multiplier -> " << *DmgStandard << std::endl;
+	std::cout << "          Enemy Damage Magic Multiplier -> " << *DmgMagic << std::endl;
+	std::cout << "           Enemy Damage Fire Multiplier -> " << *DmgFire << std::endl;
+	std::cout << "      Enemy Damage Lightning Multiplier -> " << *DmgLightning << std::endl;
+	std::cout << "           Enemy Damage Dark Multiplier -> " << *DmgDark << std::endl;
+	std::cout << "      Enemy Defense Physical Multiplier -> " << *DefPhys << std::endl;
+	std::cout << "         Enemy Defense Magic Multiplier -> " << *DefMagic << std::endl;
+	std::cout << "          Enemy Defense Fire Multiplier -> " << *DefFire << std::endl;
+	std::cout << "     Enemy Defense Lightning Multiplier -> " << *DefLightning << std::endl;
+	std::cout << "          Enemy Defense Dark Multiplier -> " << *DefDark << "\n";
+	std::cout << "        Enemy Damage Stamina Multiplier -> " << *DmgStamina << std::endl;
+	std::cout << "            Player Gain Soul Multiplier -> " << *SoulGainMult << std::endl;
+	std::cout << "     Enemy Resistance Poison Multiplier -> " << *ResistPoison << std::endl;
+	std::cout << "      Enemy Resistance Toxic Multiplier -> " << *ResistToxic << std::endl;
+	std::cout << "      Enemy Resistance Bleed Multiplier -> " << *ResistBleed << std::endl;
+	std::cout << "      Enemy Resistance Curse Multiplier -> " << *ResistCurse << std::endl;
+	std::cout << "      Enemy Resistance Frost Multiplier -> " << *ResistFrost << std::endl;
+	std::cout << "           Unknown-HpRecover Multiplier -> " << *HpRecover << std::endl;
+	std::cout << "Player VS Enemy Damage Poise Multiplier -> " << *PlayerPoiseDmgMultiplier << std::endl;
+	std::cout << "        Unknown-subHpRecover Multiplier -> " << *subHpRecover << std::endl;
 
 	std::cout << std::endl << std::endl;
 
@@ -386,47 +463,36 @@ int NGDifficulty(int RowOffset, float NGMultiplier, int DifficultyLevel) {
 
 }
 
-void FPstaminaDrain() {
-	std::cout << "FPstaminaDrain() - Start" << std::endl;
-	std::thread StaminaDebuff(StaminaHalfCut);
-	int Second = 1000;
-	long long BaseB = 0x144768E78;
-	int XA = 0x1F90;
+void MainLoop() {
 	while (true) {
-		int* stamina = mlp<int>((void*)BaseB, 0x80, XA, 0x18, 0xF0);
-		unsigned int* maxstamina = mlp<unsigned int>((void*)BaseB, 0x80, XA, 0x18, 0xF4);
-		unsigned int* fp = mlp<unsigned int>((void*)BaseB, 0x80, XA, 0x18, 0xE4);
-		unsigned int* maxfp = mlp<unsigned int>((void*)BaseB, 0x80, XA, 0x18, 0xE8);
-		unsigned int* basemaxfp = mlp<unsigned int>((void*)BaseB, 0x80, XA, 0x18, 0xEC);
-		unsigned int* HeroBaseAddress = mlp<unsigned int>((void*)BaseB, 0x80, XA, 0x18);
-		if (HeroBaseAddress != nullptr) {
-			if (stamina != nullptr) {
-				if (*fp < *basemaxfp) {
-					if ((int)((double)*stamina - ((double)*maxstamina * 0.40)) > 0) {
-						std::cout << "looping stamina drain fpgib" << std::endl;
-						*stamina = (int)((double)*stamina - ((double)*maxstamina * 0.40));
-						*fp += (byte)5;
-					}
-				}
-			}
+		std::cout << "MainLoop()" << std::endl;
+		int* stamina = (int*)GetPointer(true, PointerPlayerStamina);
+		unsigned int* maxstamina = GetPointer(true, PointerPlayerMaxStamina);
+		unsigned int* fp = GetPointer(true, PointerPlayerFocusPoints);
+		unsigned int* basemaxfp = GetPointer(true, PointerPlayerMaxFocusPoints);
+
+		if (*fp < *basemaxfp) {
+			FPstaminaDrain(stamina, maxstamina, fp, basemaxfp);
 		}
+
+		std::this_thread::sleep_for(std::chrono::seconds(4));
 	}
 }
 
-void StaminaHalfCut() {
-	std::cout << "StaminaHalfCut() - Start" << std::endl;
-	long long BaseB = 0x144768E78;
-	int XA = 0x1F90;
-	while (true) {
-		unsigned int* HeroBaseAddress = mlp<unsigned int>((void*)BaseB, 0x80, XA, 0x18);
-		int* stamina = mlp<int>((void*)BaseB, 0x80, XA, 0x18, 0xF0);
-		int* maxstamina = mlp<int>((void*)BaseB, 0x80, XA, 0x18, 0xF4);
-		if (HeroBaseAddress != nullptr) {
-			if (stamina != nullptr) {
-				if (*stamina > (*maxstamina / 2)) {
-					*stamina = (*maxstamina / 2);
-				}
-			}
+void FPstaminaDrain(int* stamina, unsigned int* maxstamina, unsigned int* fp, unsigned int* basemaxfp) {
+	std::cout << "FPstaminaDrain() - Initialize" << std::endl;
+	std::this_thread::sleep_for(std::chrono::milliseconds(500));
+	int fpgain = (int)std::ceil(4 + (6 * *GetPointer(true, PointerPlayerStaminaLevel) / 100));
+	while (*fp < *basemaxfp) {
+		std::this_thread::sleep_for(std::chrono::milliseconds(500));
+		if (GetPointer(false, PointerPlayerStatBaseAddress) == nullptr) { 
+			std::cout << "FPstaminaDrain() - Pointer Error" << std::endl;
+			break; 
+		}
+		if ((int)((double)*stamina - ((double)*maxstamina * 0.50)) > 0) {
+			*stamina = (int)((double)*stamina - ((double)*maxstamina * 0.50));
+			*fp += fpgain;
 		}
 	}
+	std::cout << "FPstaminaDrain() - End" << std::endl;
 }

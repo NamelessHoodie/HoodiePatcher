@@ -167,6 +167,7 @@
     <ClInclude Include="MinHook\src\HDE\table32.h" />
     <ClInclude Include="MinHook\src\HDE\table64.h" />
     <ClInclude Include="MinHook\src\trampoline.h" />
+    <ClInclude Include="PointersDef.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dinput8\dinputWrapper.cpp" />
