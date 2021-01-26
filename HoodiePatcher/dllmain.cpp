@@ -12,19 +12,19 @@
 #include <string>
 #include "PointersDef.h"
 
-int NGDifficulty(int RowOffset, float NGMultiplier, int DifficultyLevel);
-
-int DifficultyModule();
+void MainLoop();
 
 int StaticAddressPatcher();
 
-void FPstaminaDrain(int* stamina, unsigned int* maxstamina, unsigned int* fp, unsigned int* basemaxfp);
+int DifficultyModule();
 
-void MainLoop();
+int NGDifficulty(int RowOffset, float NGMultiplier, int DifficultyLevel);
 
 unsigned int* GetPointer(bool PointerValid, int PointerName);
 
 bool isSpeffectActive(int Speffect);
+
+void FPstaminaDrain(int* stamina, unsigned int* maxstamina, unsigned int* fp, unsigned int* basemaxfp);
 
 
 tDirectInput8Create oDirectInput8Create;
@@ -124,6 +124,23 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReserv
 	return TRUE;
 }
 
+void MainLoop() {
+	while (true) {
+		std::this_thread::sleep_for(std::chrono::seconds(4));
+		std::cout << "MainLoop()" << std::endl;
+		int* stamina = (int*)GetPointer(true, PointerPlayerStamina);
+		unsigned int* maxstamina = GetPointer(true, PointerPlayerMaxStamina);
+		unsigned int* fp = GetPointer(true, PointerPlayerFocusPoints);
+		unsigned int* basemaxfp = GetPointer(true, PointerPlayerMaxFocusPoints);
+
+		if (isSpeffectActive(2100) == true) {
+			if (*fp < *basemaxfp) {
+				FPstaminaDrain(stamina, maxstamina, fp, basemaxfp);
+			}
+		}
+	}
+}
+
 int StaticAddressPatcher() {
 
 	std::cout << "StaticAddressPatcher - Start" << std::endl << std::endl;
@@ -151,71 +168,6 @@ int StaticAddressPatcher() {
 	std::cout << "DebugAnimSpeedEnemy = " << *(unsigned int*)0x144768F81 << std::endl << std::endl;
 
 	std::cout << "StaticAddressPatcher - End" << std::endl << std::endl;
-
-}
-
-unsigned int* GetPointer(bool PointerValid, int PointerName) {
-	long long BaseB = 0x144768E78;
-	long long BaseA = 0x144740178;
-	int XA = 0x1F90;
-	unsigned int* Address = nullptr;
-	if (PointerName == PointerPlayerStatBaseAddress) {
-		while (Address == nullptr) {
-			Address = mlp<unsigned int>((void*)BaseB, 0x80, XA, 0x18);
-			if (PointerValid == false) { break; }
-		}
-	}
-	else if (PointerName == PointerPlayerStamina) {
-		while (Address == nullptr) {
-			Address = mlp<unsigned int>((void*)BaseB, 0x80, XA, 0x18, 0xF0);
-			if (PointerValid == false) { break; }
-		}
-	}
-	else if (PointerName == PointerPlayerMaxStamina) {
-		while (Address == nullptr) {
-			Address = mlp<unsigned int>((void*)BaseB, 0x80, XA, 0x18, 0xF4);
-			if (PointerValid == false) { break; }
-		}
-	}
-	else if (PointerName == PointerPlayerFocusPoints) {
-		while (Address == nullptr) {
-			Address = mlp<unsigned int>((void*)BaseB, 0x80, XA, 0x18, 0xE4);
-			if (PointerValid == false) { break; }
-		}
-	}
-	else if (PointerName == PointerPlayerMaxFocusPoints) {
-		while (Address == nullptr) {
-			Address = mlp<unsigned int>((void*)BaseB, 0x80, XA, 0x18, 0xEC);
-			if (PointerValid == false) { break; }
-		}
-	}
-	else if (PointerName == PointerClearCountCorrectParam) {
-		while (Address == nullptr) {
-			Address = mlp<unsigned int>((void*)0x144782838, 0x17C8, 0x68, 0x68, 0x0);
-			if (PointerValid == false) { break; }
-		}
-	}
-	else if (PointerName == PointerPlayerStaminaLevel) {
-		while (Address == nullptr) {
-			Address = mlp<unsigned int>((void*)BaseA, 0x10, 0x4C);
-			if (PointerValid == false) { break; }
-		}
-	}
-	else if (PointerName == PointerSpeffectListStart) {
-		while (Address == nullptr) {
-			Address = mlp<unsigned int>((void*)BaseA, 0x10, 0x920, 0x8);
-			if (PointerValid == false) { break; }
-		}
-	}
-	else if (PointerName == PointerPlayerSpeffect1Semaphore) {
-		while (Address == nullptr) {
-			Address = mlp<unsigned int>((void*)BaseA, 0x10, 0x920, 0x8, 0x60);
-			if (PointerValid == false) { break; }
-		}
-	}
-
-
-	return Address;
 
 }
 
@@ -478,46 +430,72 @@ int NGDifficulty(int RowOffset, float NGMultiplier, int DifficultyLevel) {
 
 }
 
-void MainLoop() {
-	while (true) {
-		std::this_thread::sleep_for(std::chrono::seconds(4));
-		std::cout << "MainLoop()" << std::endl;
-		int* stamina = (int*)GetPointer(true, PointerPlayerStamina);
-		unsigned int* maxstamina = GetPointer(true, PointerPlayerMaxStamina);
-		unsigned int* fp = GetPointer(true, PointerPlayerFocusPoints);
-		unsigned int* basemaxfp = GetPointer(true, PointerPlayerMaxFocusPoints);
-
-		if (isSpeffectActive(2100) == true) {
-			if (*fp < *basemaxfp) {
-				FPstaminaDrain(stamina, maxstamina, fp, basemaxfp);
-			}
+unsigned int* GetPointer(bool PointerValid, int PointerName) {
+	long long BaseB = 0x144768E78;
+	long long BaseA = 0x144740178;
+	int XA = 0x1F90;
+	unsigned int* Address = nullptr;
+	if (PointerName == PointerPlayerStatBaseAddress) {
+		while (Address == nullptr) {
+			Address = mlp<unsigned int>((void*)BaseB, 0x80, XA, 0x18);
+			if (PointerValid == false) { break; }
 		}
 	}
-}
-
-void FPstaminaDrain(int* stamina, unsigned int* maxstamina, unsigned int* fp, unsigned int* basemaxfp) {
-	std::cout << "FPstaminaDrain() - Initialize" << std::endl;
-	std::this_thread::sleep_for(std::chrono::milliseconds(500));
-	int fpgain = (int)std::ceil(4 + (6 * *GetPointer(true, PointerPlayerStaminaLevel) / 100));
-	while (*fp < *basemaxfp) {
-		std::this_thread::sleep_for(std::chrono::milliseconds(500));
-		if (GetPointer(false, PointerPlayerStatBaseAddress) == nullptr) {
-			std::cout << "FPstaminaDrain() - Pointer Error" << std::endl;
-			break;
-		}
-		if ((int)((double)*stamina - ((double)*maxstamina * 0.50)) > 0) {
-			*stamina = (int)((double)*stamina - ((double)*maxstamina * 0.50));
-			*fp += fpgain;
+	else if (PointerName == PointerPlayerStamina) {
+		while (Address == nullptr) {
+			Address = mlp<unsigned int>((void*)BaseB, 0x80, XA, 0x18, 0xF0);
+			if (PointerValid == false) { break; }
 		}
 	}
-	std::cout << "FPstaminaDrain() - End" << std::endl;
+	else if (PointerName == PointerPlayerMaxStamina) {
+		while (Address == nullptr) {
+			Address = mlp<unsigned int>((void*)BaseB, 0x80, XA, 0x18, 0xF4);
+			if (PointerValid == false) { break; }
+		}
+	}
+	else if (PointerName == PointerPlayerFocusPoints) {
+		while (Address == nullptr) {
+			Address = mlp<unsigned int>((void*)BaseB, 0x80, XA, 0x18, 0xE4);
+			if (PointerValid == false) { break; }
+		}
+	}
+	else if (PointerName == PointerPlayerMaxFocusPoints) {
+		while (Address == nullptr) {
+			Address = mlp<unsigned int>((void*)BaseB, 0x80, XA, 0x18, 0xEC);
+			if (PointerValid == false) { break; }
+		}
+	}
+	else if (PointerName == PointerClearCountCorrectParam) {
+		while (Address == nullptr) {
+			Address = mlp<unsigned int>((void*)0x144782838, 0x17C8, 0x68, 0x68, 0x0);
+			if (PointerValid == false) { break; }
+		}
+	}
+	else if (PointerName == PointerPlayerStaminaLevel) {
+		while (Address == nullptr) {
+			Address = mlp<unsigned int>((void*)BaseA, 0x10, 0x4C);
+			if (PointerValid == false) { break; }
+		}
+	}
+	else if (PointerName == PointerSpeffectListStart) {
+		while (Address == nullptr) {
+			Address = mlp<unsigned int>((void*)BaseA, 0x10, 0x920, 0x8);
+			if (PointerValid == false) { break; }
+		}
+	}
+	else if (PointerName == PointerPlayerSpeffect1Semaphore) {
+		while (Address == nullptr) {
+			Address = mlp<unsigned int>((void*)BaseA, 0x10, 0x920, 0x8, 0x60);
+			if (PointerValid == false) { break; }
+		}
+	}
+
+
+	return Address;
+
 }
 
 bool isSpeffectActive(int Speffect) {
-	if (GetPointer(false, PointerPlayerSpeffect1Semaphore) == nullptr) {
-		std::cout << "isSpeffectActive() - Pointer Error... Returning\n";
-		return false;
-	}
 	byte* SpeffectList = (byte*)GetPointer(true, PointerSpeffectListStart);
 	byte SpeffectOffset1 = (byte)0x78;
 	byte SpeffectOffset2 = (byte)0x60;
@@ -537,4 +515,22 @@ bool isSpeffectActive(int Speffect) {
 
 	}
 	return false;
+}
+
+void FPstaminaDrain(int* stamina, unsigned int* maxstamina, unsigned int* fp, unsigned int* basemaxfp) {
+	std::cout << "FPstaminaDrain() - Initialize" << std::endl;
+	std::this_thread::sleep_for(std::chrono::milliseconds(500));
+	int fpgain = (int)std::ceil(4 + (6 * *GetPointer(true, PointerPlayerStaminaLevel) / 100));
+	while (*fp < *basemaxfp) {
+		std::this_thread::sleep_for(std::chrono::milliseconds(500));
+		if (GetPointer(false, PointerPlayerStatBaseAddress) == nullptr) {
+			std::cout << "FPstaminaDrain() - Pointer Error" << std::endl;
+			break;
+		}
+		if ((int)((double)*stamina - ((double)*maxstamina * 0.50)) > 0) {
+			*stamina = (int)((double)*stamina - ((double)*maxstamina * 0.50));
+			*fp += fpgain;
+		}
+	}
+	std::cout << "FPstaminaDrain() - End" << std::endl;
 }
