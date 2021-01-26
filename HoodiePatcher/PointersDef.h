@@ -7,3 +7,5 @@
 #define PointerPlayerMaxFocusPoints 5
 #define PointerClearCountCorrectParam 6
 #define PointerPlayerStaminaLevel 7
+#define PointerSpeffectListStart 8
+#define PointerPlayerSpeffect1Semaphore 9
