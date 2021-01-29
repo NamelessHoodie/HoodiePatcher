@@ -12,6 +12,7 @@
 #include <string>
 #include "PointersDef.h"
 #include "stdint.h"
+#include <tuple>
 
 void MainLoop();
 
@@ -29,11 +30,9 @@ void FPstaminaDrain(int* stamina, unsigned int* maxstamina, unsigned int* fp, un
 
 long long* Parameme(int RowID);
 
-void EquipParamWeapon(int EquipParamWeaponRowID, int TriggerSpeffectID, int TargetspAtkCategory);
+std::tuple<int16_t*, int16_t> EquipParamWeapon(int EquipParamWeaponRowID);
 
-void EquipParamWeaponSwapper(int16_t* spAtkCategory, int16_t oldSpspAtkCategory, int TriggerSpeffectID, int TargetspAtkCategory);
-
-void MovesetSwap(int InfusionRange, int EquipParamWeaponRowID, int TriggerSpeffectID, int TargetspAtkCategory);
+void EquipParamWeaponSwapper(int InfusionRange, int EquipParamWeaponRowID, int TriggerSpeffectID, int TargetspAtkCategory);
 
 bool MovesetSwap1 = false;
 
@@ -154,78 +153,7 @@ long long* Parameme(int RowID) {
 	}
 }
 
-void MovesetSwap(int InfusionRange, int EquipParamWeaponRowID, int TriggerSpeffectID, int TargetspAtkCategory) {
-
-	MovesetSwap1 = true;
-
-
-		std::thread T0(EquipParamWeapon, EquipParamWeaponRowID, TriggerSpeffectID, TargetspAtkCategory);
-	if (InfusionRange >= 100) {
-		std::thread T1(EquipParamWeapon, (EquipParamWeaponRowID + 100), TriggerSpeffectID, TargetspAtkCategory);
-		T1.detach();
-	}
-	if (InfusionRange >= 200) {
-		std::thread T2(EquipParamWeapon, (EquipParamWeaponRowID + 200), TriggerSpeffectID, TargetspAtkCategory);
-		T2.detach();
-	}
-	if (InfusionRange >= 300) {
-		std::thread T3(EquipParamWeapon, (EquipParamWeaponRowID + 300), TriggerSpeffectID, TargetspAtkCategory);
-		T3.detach();
-	}
-	if (InfusionRange >= 400) {
-		std::thread T4(EquipParamWeapon, (EquipParamWeaponRowID + 400), TriggerSpeffectID, TargetspAtkCategory);
-		T4.detach();
-	}
-	if (InfusionRange >= 500) {
-		std::thread T5(EquipParamWeapon, (EquipParamWeaponRowID + 500), TriggerSpeffectID, TargetspAtkCategory);
-		T5.detach();
-	}
-	if (InfusionRange >= 600) {
-		std::thread T6(EquipParamWeapon, (EquipParamWeaponRowID + 600), TriggerSpeffectID, TargetspAtkCategory);
-		T6.detach();
-	}
-	if (InfusionRange >= 700) {
-		std::thread T7(EquipParamWeapon, (EquipParamWeaponRowID + 700), TriggerSpeffectID, TargetspAtkCategory);
-		T7.detach();
-	}
-	if (InfusionRange >= 800) {
-		std::thread T8(EquipParamWeapon, (EquipParamWeaponRowID + 800), TriggerSpeffectID, TargetspAtkCategory);
-		T8.detach();
-	}
-	if (InfusionRange >= 900) {
-		std::thread T9(EquipParamWeapon, (EquipParamWeaponRowID + 900), TriggerSpeffectID, TargetspAtkCategory);
-		T9.detach();
-	}
-	if (InfusionRange >= 1000) {
-		std::thread T10(EquipParamWeapon, (EquipParamWeaponRowID + 1000), TriggerSpeffectID, TargetspAtkCategory);
-		T10.detach();
-	}
-	if (InfusionRange >= 1100) {
-		std::thread T11(EquipParamWeapon, (EquipParamWeaponRowID + 1100), TriggerSpeffectID, TargetspAtkCategory);
-		T11.detach();
-	}
-	if (InfusionRange >= 1200) {
-		std::thread T12(EquipParamWeapon, (EquipParamWeaponRowID + 1200), TriggerSpeffectID, TargetspAtkCategory);
-		T12.detach();
-	}
-	if (InfusionRange >= 1300) {
-		std::thread T13(EquipParamWeapon, (EquipParamWeaponRowID + 1300), TriggerSpeffectID, TargetspAtkCategory);
-		T13.detach();
-	}
-	if (InfusionRange >= 1400) {
-		std::thread T14(EquipParamWeapon, (EquipParamWeaponRowID + 1400), TriggerSpeffectID, TargetspAtkCategory);
-		T14.detach();
-	}
-	if (InfusionRange >= 1500) {
-		std::thread T15(EquipParamWeapon, (EquipParamWeaponRowID + 1500), TriggerSpeffectID, TargetspAtkCategory);
-		T15.detach();
-	}
-
-	T0.join();
-	MovesetSwap1 = false;
-}
-
-void EquipParamWeapon(int EquipParamWeaponRowID, int TriggerSpeffectID, int TargetspAtkCategory) {
+std::tuple<int16_t*, int16_t> EquipParamWeapon(int EquipParamWeaponRowID) {
 	byte Bytes1 = (byte)0x01;
 	byte Bytes2 = (byte)0x02;
 	byte Bytes4 = (byte)0x04;
@@ -626,29 +554,315 @@ void EquipParamWeapon(int EquipParamWeaponRowID, int TriggerSpeffectID, int Targ
 
 	int16_t oldSpspAtkCategory = *spAtkCategory;
 
-	EquipParamWeaponSwapper(spAtkCategory, oldSpspAtkCategory, TriggerSpeffectID, TargetspAtkCategory);
+	return std::make_tuple(spAtkCategory, oldSpspAtkCategory);
 
 	std::this_thread::sleep_for(std::chrono::seconds(1000));
 
 }
 
-void EquipParamWeaponSwapper(int16_t* spAtkCategory, int16_t oldSpspAtkCategory, int TriggerSpeffectID, int TargetspAtkCategory) {
-	unsigned int Timer = 0;
-	while (Timer < 15) {
-		while (isSpeffectActive(TriggerSpeffectID) == true) {
-			if (*spAtkCategory != TargetspAtkCategory) {
-				*spAtkCategory = TargetspAtkCategory;
-			}
-			Timer = 0;
-			std::this_thread::sleep_for(std::chrono::seconds(4));
-		}
-		if (*spAtkCategory != oldSpspAtkCategory) {
-			*spAtkCategory = oldSpspAtkCategory;
-		}
-		std::this_thread::sleep_for(std::chrono::seconds(4));
-		Timer += 1;
+void EquipParamWeaponSwapper(int InfusionRange, int EquipParamWeaponRowID, int TriggerSpeffectID, int TargetspAtkCategory) {
+	if (InfusionRange > 1500) {
+		return;
+		std::cout << "EquipParamWeaponSwapper() - Critical error - Specified Infusionrange for " << EquipParamWeaponRowID << " is higher than maximum implemented, 1500 is the highest\nto fix this error decrease it.";
 	}
-	std::cout << "EquipParamWeaponSwapper - Expired \n";
+
+	int16_t* spAtkCategory0000 = nullptr;
+	int16_t oldSpspAtkCategory0000;
+
+	int16_t* spAtkCategory0100 = nullptr;
+	int16_t oldSpspAtkCategory0100;
+
+	int16_t* spAtkCategory0200 = nullptr;
+	int16_t oldSpspAtkCategory0200;
+
+	int16_t* spAtkCategory0300 = nullptr;
+	int16_t oldSpspAtkCategory0300;
+
+	int16_t* spAtkCategory0400 = nullptr;
+	int16_t oldSpspAtkCategory0400;
+
+	int16_t* spAtkCategory0500 = nullptr;
+	int16_t oldSpspAtkCategory0500;
+
+	int16_t* spAtkCategory0600 = nullptr;
+	int16_t oldSpspAtkCategory0600;
+
+	int16_t* spAtkCategory0700 = nullptr;
+	int16_t oldSpspAtkCategory0700;
+
+	int16_t* spAtkCategory0800 = nullptr;
+	int16_t oldSpspAtkCategory0800;
+
+	int16_t* spAtkCategory0900 = nullptr;
+	int16_t oldSpspAtkCategory0900;
+
+	int16_t* spAtkCategory1000 = nullptr;
+	int16_t oldSpspAtkCategory1000;
+
+	int16_t* spAtkCategory1100 = nullptr;
+	int16_t oldSpspAtkCategory1100;
+
+	int16_t* spAtkCategory1200 = nullptr;
+	int16_t oldSpspAtkCategory1200;
+
+	int16_t* spAtkCategory1300 = nullptr;
+	int16_t oldSpspAtkCategory1300;
+
+	int16_t* spAtkCategory1400 = nullptr;
+	int16_t oldSpspAtkCategory1400;
+
+	int16_t* spAtkCategory1500 = nullptr;
+	int16_t oldSpspAtkCategory1500;
+
+	if (InfusionRange >= 0) {
+		spAtkCategory0000;
+		oldSpspAtkCategory0000;
+		std::tie(spAtkCategory0000, oldSpspAtkCategory0000) = EquipParamWeapon(EquipParamWeaponRowID);
+	}
+	if (InfusionRange >= 100) {
+		spAtkCategory0100;
+		oldSpspAtkCategory0100;
+		std::tie(spAtkCategory0100, oldSpspAtkCategory0100) = EquipParamWeapon(EquipParamWeaponRowID + 100);
+	}
+	if (InfusionRange >= 200) {
+		spAtkCategory0200;
+		oldSpspAtkCategory0200;
+		std::tie(spAtkCategory0200, oldSpspAtkCategory0200) = EquipParamWeapon(EquipParamWeaponRowID + 200);
+	}
+	if (InfusionRange >= 300) {
+		spAtkCategory0300;
+		oldSpspAtkCategory0300;
+		std::tie(spAtkCategory0300, oldSpspAtkCategory0300) = EquipParamWeapon(EquipParamWeaponRowID + 300);
+	}
+	if (InfusionRange >= 400) {
+		spAtkCategory0400;
+		oldSpspAtkCategory0400;
+		std::tie(spAtkCategory0400, oldSpspAtkCategory0400) = EquipParamWeapon(EquipParamWeaponRowID + 400);
+	}
+	if (InfusionRange >= 500) {
+		spAtkCategory0500;
+		oldSpspAtkCategory0500;
+		std::tie(spAtkCategory0500, oldSpspAtkCategory0500) = EquipParamWeapon(EquipParamWeaponRowID + 500);
+	}
+	if (InfusionRange >= 600) {
+		spAtkCategory0600;
+		oldSpspAtkCategory0600;
+		std::tie(spAtkCategory0600, oldSpspAtkCategory0600) = EquipParamWeapon(EquipParamWeaponRowID + 600);
+	}
+	if (InfusionRange >= 700) {
+		spAtkCategory0700;
+		oldSpspAtkCategory0700;
+		std::tie(spAtkCategory0700, oldSpspAtkCategory0700) = EquipParamWeapon(EquipParamWeaponRowID + 700);
+	}
+	if (InfusionRange >= 800) {
+		spAtkCategory0800;
+		oldSpspAtkCategory0800;
+		std::tie(spAtkCategory0800, oldSpspAtkCategory0800) = EquipParamWeapon(EquipParamWeaponRowID + 800);
+	}
+	if (InfusionRange >= 900) {
+		spAtkCategory0900;
+		oldSpspAtkCategory0900;
+		std::tie(spAtkCategory0900, oldSpspAtkCategory0900) = EquipParamWeapon(EquipParamWeaponRowID + 900);
+	}
+	if (InfusionRange >= 1000) {
+		spAtkCategory1000;
+		oldSpspAtkCategory1000;
+		std::tie(spAtkCategory1000, oldSpspAtkCategory1000) = EquipParamWeapon(EquipParamWeaponRowID + 1000);
+	}
+	if (InfusionRange >= 1100) {
+		spAtkCategory1100;
+		oldSpspAtkCategory1100;
+		std::tie(spAtkCategory1100, oldSpspAtkCategory1100) = EquipParamWeapon(EquipParamWeaponRowID + 1100);
+	}
+	if (InfusionRange >= 1200) {
+		spAtkCategory1200;
+		oldSpspAtkCategory1200;
+		std::tie(spAtkCategory1200, oldSpspAtkCategory1200) = EquipParamWeapon(EquipParamWeaponRowID + 1200);
+	}
+	if (InfusionRange >= 1300) {
+		spAtkCategory1300;
+		oldSpspAtkCategory1300;
+		std::tie(spAtkCategory1300, oldSpspAtkCategory1300) = EquipParamWeapon(EquipParamWeaponRowID + 1300);
+	}
+	if (InfusionRange >= 1400) {
+		spAtkCategory1400;
+		oldSpspAtkCategory1400;
+		std::tie(spAtkCategory1400, oldSpspAtkCategory1400) = EquipParamWeapon(EquipParamWeaponRowID + 1400);
+	}
+	if (InfusionRange == 1500) {
+		spAtkCategory1500;
+		oldSpspAtkCategory1500;
+		std::tie(spAtkCategory1500, oldSpspAtkCategory1500) = EquipParamWeapon(EquipParamWeaponRowID + 1500);
+	}
+
+	while (true) {
+		if (spAtkCategory0000 != nullptr) {
+			if (*spAtkCategory0000 != TargetspAtkCategory) {
+				*spAtkCategory0000 = TargetspAtkCategory;
+			}
+		}
+		if (spAtkCategory0100 != nullptr) {
+			if (*spAtkCategory0100 != TargetspAtkCategory) {
+				*spAtkCategory0100 = TargetspAtkCategory;
+			}
+		}
+		if (spAtkCategory0200 != nullptr) {
+			if (*spAtkCategory0200 != TargetspAtkCategory) {
+				*spAtkCategory0200 = TargetspAtkCategory;
+			}
+		}
+		if (spAtkCategory0300 != nullptr) {
+			if (*spAtkCategory0300 != TargetspAtkCategory) {
+				*spAtkCategory0300 = TargetspAtkCategory;
+			}
+		}
+		if (spAtkCategory0400 != nullptr) {
+			if (*spAtkCategory0400 != TargetspAtkCategory) {
+				*spAtkCategory0400 = TargetspAtkCategory;
+			}
+		}
+		if (spAtkCategory0500 != nullptr) {
+			if (*spAtkCategory0500 != TargetspAtkCategory) {
+				*spAtkCategory0500 = TargetspAtkCategory;
+			}
+		}
+		if (spAtkCategory0600 != nullptr) {
+			if (*spAtkCategory0600 != TargetspAtkCategory) {
+				*spAtkCategory0600 = TargetspAtkCategory;
+			}
+		}
+		if (spAtkCategory0700 != nullptr) {
+			if (*spAtkCategory0700 != TargetspAtkCategory) {
+				*spAtkCategory0700 = TargetspAtkCategory;
+			}
+		}
+		if (spAtkCategory0800 != nullptr) {
+			if (*spAtkCategory0800 != TargetspAtkCategory) {
+				*spAtkCategory0800 = TargetspAtkCategory;
+			}
+		}
+		if (spAtkCategory0900 != nullptr) {
+			if (*spAtkCategory0900 != TargetspAtkCategory) {
+				*spAtkCategory0900 = TargetspAtkCategory;
+			}
+		}
+		if (spAtkCategory1000 != nullptr) {
+			if (*spAtkCategory1000 != TargetspAtkCategory) {
+				*spAtkCategory1000 = TargetspAtkCategory;
+			}
+		}
+		if (spAtkCategory1100 != nullptr) {
+			if (*spAtkCategory1100 != TargetspAtkCategory) {
+				*spAtkCategory1100 = TargetspAtkCategory;
+			}
+		}
+		if (spAtkCategory1200 != nullptr) {
+			if (*spAtkCategory1200 != TargetspAtkCategory) {
+				*spAtkCategory1200 = TargetspAtkCategory;
+			}
+		}
+		if (spAtkCategory1300 != nullptr) {
+			if (*spAtkCategory1300 != TargetspAtkCategory) {
+				*spAtkCategory1300 = TargetspAtkCategory;
+			}
+		}
+		if (spAtkCategory1400 != nullptr) {
+			if (*spAtkCategory1400 != TargetspAtkCategory) {
+				*spAtkCategory1400 = TargetspAtkCategory;
+			}
+		}
+		if (spAtkCategory1500 != nullptr) {
+			if (*spAtkCategory1500 != TargetspAtkCategory) {
+				*spAtkCategory1500 = TargetspAtkCategory;
+			}
+		}
+		if (isSpeffectActive(TriggerSpeffectID) != true) {
+			break;
+		}
+		std::this_thread::sleep_for(std::chrono::seconds(1));
+	}
+	if (spAtkCategory0000 != nullptr) {
+		if (*spAtkCategory0000 != oldSpspAtkCategory0000) {
+			*spAtkCategory0000 = oldSpspAtkCategory0000;
+		}
+	}
+	if (spAtkCategory0100 != nullptr) {
+		if (*spAtkCategory0100 != oldSpspAtkCategory0100) {
+			*spAtkCategory0100 = oldSpspAtkCategory0100;
+		}
+	}
+	if (spAtkCategory0200 != nullptr) {
+		if (*spAtkCategory0200 != oldSpspAtkCategory0200) {
+			*spAtkCategory0200 = oldSpspAtkCategory0200;
+		}
+	}
+	if (spAtkCategory0300 != nullptr) {
+		if (*spAtkCategory0300 != oldSpspAtkCategory0300) {
+			*spAtkCategory0300 = oldSpspAtkCategory0300;
+		}
+	}
+	if (spAtkCategory0400 != nullptr) {
+		if (*spAtkCategory0400 != oldSpspAtkCategory0400) {
+			*spAtkCategory0400 = oldSpspAtkCategory0400;
+		}
+	}
+	if (spAtkCategory0500 != nullptr) {
+		if (*spAtkCategory0500 != oldSpspAtkCategory0500) {
+			*spAtkCategory0500 = oldSpspAtkCategory0500;
+		}
+	}
+	if (spAtkCategory0600 != nullptr) {
+		if (*spAtkCategory0600 != oldSpspAtkCategory0600) {
+			*spAtkCategory0600 = oldSpspAtkCategory0600;
+		}
+	}
+	if (spAtkCategory0700 != nullptr) {
+		if (*spAtkCategory0700 != oldSpspAtkCategory0700) {
+			*spAtkCategory0700 = oldSpspAtkCategory0700;
+		}
+	}
+	if (spAtkCategory0800 != nullptr) {
+		if (*spAtkCategory0800 != oldSpspAtkCategory0800) {
+			*spAtkCategory0800 = oldSpspAtkCategory0800;
+		}
+	}
+	if (spAtkCategory0900 != nullptr) {
+		if (*spAtkCategory0900 != oldSpspAtkCategory0900) {
+			*spAtkCategory0900 = oldSpspAtkCategory0900;
+		}
+	}
+	if (spAtkCategory1000 != nullptr) {
+		if (*spAtkCategory1000 != oldSpspAtkCategory1000) {
+			*spAtkCategory1000 = oldSpspAtkCategory1000;
+		}
+	}
+	if (spAtkCategory1100 != nullptr) {
+		if (*spAtkCategory1100 != oldSpspAtkCategory1100) {
+			*spAtkCategory1100 = oldSpspAtkCategory1100;
+		}
+	}
+	if (spAtkCategory1200 != nullptr) {
+		if (*spAtkCategory1200 != oldSpspAtkCategory1200) {
+			*spAtkCategory1200 = oldSpspAtkCategory1200;
+		}
+	}
+	if (spAtkCategory1300 != nullptr) {
+		if (*spAtkCategory1300 != oldSpspAtkCategory1300) {
+			*spAtkCategory1300 = oldSpspAtkCategory1300;
+		}
+	}
+	if (spAtkCategory1400 != nullptr) {
+		if (*spAtkCategory1400 != oldSpspAtkCategory1400) {
+			*spAtkCategory1400 = oldSpspAtkCategory1400;
+		}
+	}
+	if (spAtkCategory1500 != nullptr) {
+		if (*spAtkCategory1500 != oldSpspAtkCategory1500) {
+			*spAtkCategory1500 = oldSpspAtkCategory1500;
+		}
+	}
+
+	std::this_thread::sleep_for(std::chrono::seconds(1));
 }
 
 void MainLoop() {
@@ -665,11 +879,11 @@ void MainLoop() {
 				FPstaminaDrain(stamina, maxstamina, fp, basemaxfp);
 			}
 		}
-		if (isSpeffectActive(2100) == true and MovesetSwap1 == false) {
+		/*if (isSpeffectActive(2100) == true and MovesetSwap1 == false) {
 			std::cout << "startmemeswap";
-			std::thread MovesetSwap (MovesetSwap, 1500, 6100000, 2100, 193);
-			MovesetSwap.detach();
-		}
+			std::thread MovesetSwap1(EquipParamWeaponSwapper, 1500, 6100000, 2100, 193);
+			MovesetSwap1.detach();
+		}*/
 	}
 }
 
