@@ -9,3 +9,4 @@
 #define PointerPlayerStaminaLevel 7
 #define PointerSpeffectListStart 8
 #define PointerPlayerSpeffect1Semaphore 9
+#define PointerEquipParamWeapon 10

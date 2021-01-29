@@ -11,6 +11,7 @@
 #include <thread>   
 #include <string>
 #include "PointersDef.h"
+#include "stdint.h"
 
 void MainLoop();
 
@@ -26,6 +27,15 @@ bool isSpeffectActive(int Speffect);
 
 void FPstaminaDrain(int* stamina, unsigned int* maxstamina, unsigned int* fp, unsigned int* basemaxfp);
 
+long long* Parameme(int RowID);
+
+void EquipParamWeapon(int EquipParamWeaponRowID, int TriggerSpeffectID, int TargetspAtkCategory);
+
+void EquipParamWeaponSwapper(int16_t* spAtkCategory, int16_t oldSpspAtkCategory, int TriggerSpeffectID, int TargetspAtkCategory);
+
+void MovesetSwap(int InfusionRange, int EquipParamWeaponRowID, int TriggerSpeffectID, int TargetspAtkCategory);
+
+bool MovesetSwap1 = false;
 
 tDirectInput8Create oDirectInput8Create;
 
@@ -124,6 +134,523 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReserv
 	return TRUE;
 }
 
+long long* Parameme(int RowID) {
+	int num = 0;
+	byte* EquiParamWeapon = (byte*)GetPointer(true, PointerEquipParamWeapon);
+	byte* DataOffset = EquiParamWeapon + (byte)0x40;
+	if (*(unsigned int*)DataOffset == RowID) {
+		return (long long*)(EquiParamWeapon + *(unsigned int*)(DataOffset + (byte)0x8));
+	}
+	while (true) {
+		num += 1;
+		DataOffset += (byte)0x18;
+		if (*(unsigned int*)DataOffset == 0) {
+			std::cout << "Row ID: " << std::dec << RowID << " Was Not Found" << std::endl;
+			return nullptr;
+		}
+		else if (*(unsigned int*)DataOffset == RowID) {
+			return (long long*)(EquiParamWeapon + *(unsigned int*)(DataOffset + (byte)0x8));
+		}
+	}
+}
+
+void MovesetSwap(int InfusionRange, int EquipParamWeaponRowID, int TriggerSpeffectID, int TargetspAtkCategory) {
+
+	MovesetSwap1 = true;
+
+
+		std::thread T0(EquipParamWeapon, EquipParamWeaponRowID, TriggerSpeffectID, TargetspAtkCategory);
+	if (InfusionRange >= 100) {
+		std::thread T1(EquipParamWeapon, (EquipParamWeaponRowID + 100), TriggerSpeffectID, TargetspAtkCategory);
+		T1.detach();
+	}
+	if (InfusionRange >= 200) {
+		std::thread T2(EquipParamWeapon, (EquipParamWeaponRowID + 200), TriggerSpeffectID, TargetspAtkCategory);
+		T2.detach();
+	}
+	if (InfusionRange >= 300) {
+		std::thread T3(EquipParamWeapon, (EquipParamWeaponRowID + 300), TriggerSpeffectID, TargetspAtkCategory);
+		T3.detach();
+	}
+	if (InfusionRange >= 400) {
+		std::thread T4(EquipParamWeapon, (EquipParamWeaponRowID + 400), TriggerSpeffectID, TargetspAtkCategory);
+		T4.detach();
+	}
+	if (InfusionRange >= 500) {
+		std::thread T5(EquipParamWeapon, (EquipParamWeaponRowID + 500), TriggerSpeffectID, TargetspAtkCategory);
+		T5.detach();
+	}
+	if (InfusionRange >= 600) {
+		std::thread T6(EquipParamWeapon, (EquipParamWeaponRowID + 600), TriggerSpeffectID, TargetspAtkCategory);
+		T6.detach();
+	}
+	if (InfusionRange >= 700) {
+		std::thread T7(EquipParamWeapon, (EquipParamWeaponRowID + 700), TriggerSpeffectID, TargetspAtkCategory);
+		T7.detach();
+	}
+	if (InfusionRange >= 800) {
+		std::thread T8(EquipParamWeapon, (EquipParamWeaponRowID + 800), TriggerSpeffectID, TargetspAtkCategory);
+		T8.detach();
+	}
+	if (InfusionRange >= 900) {
+		std::thread T9(EquipParamWeapon, (EquipParamWeaponRowID + 900), TriggerSpeffectID, TargetspAtkCategory);
+		T9.detach();
+	}
+	if (InfusionRange >= 1000) {
+		std::thread T10(EquipParamWeapon, (EquipParamWeaponRowID + 1000), TriggerSpeffectID, TargetspAtkCategory);
+		T10.detach();
+	}
+	if (InfusionRange >= 1100) {
+		std::thread T11(EquipParamWeapon, (EquipParamWeaponRowID + 1100), TriggerSpeffectID, TargetspAtkCategory);
+		T11.detach();
+	}
+	if (InfusionRange >= 1200) {
+		std::thread T12(EquipParamWeapon, (EquipParamWeaponRowID + 1200), TriggerSpeffectID, TargetspAtkCategory);
+		T12.detach();
+	}
+	if (InfusionRange >= 1300) {
+		std::thread T13(EquipParamWeapon, (EquipParamWeaponRowID + 1300), TriggerSpeffectID, TargetspAtkCategory);
+		T13.detach();
+	}
+	if (InfusionRange >= 1400) {
+		std::thread T14(EquipParamWeapon, (EquipParamWeaponRowID + 1400), TriggerSpeffectID, TargetspAtkCategory);
+		T14.detach();
+	}
+	if (InfusionRange >= 1500) {
+		std::thread T15(EquipParamWeapon, (EquipParamWeaponRowID + 1500), TriggerSpeffectID, TargetspAtkCategory);
+		T15.detach();
+	}
+
+	T0.join();
+	MovesetSwap1 = false;
+}
+
+void EquipParamWeapon(int EquipParamWeaponRowID, int TriggerSpeffectID, int TargetspAtkCategory) {
+	byte Bytes1 = (byte)0x01;
+	byte Bytes2 = (byte)0x02;
+	byte Bytes4 = (byte)0x04;
+	byte* Row = (byte*)Parameme(EquipParamWeaponRowID);
+
+	int32_t* behaviorVariationId = (int32_t*)Row;
+	Row += Bytes4;
+	int32_t* sortId = (int32_t*)Row;
+	Row += Bytes4;
+	int32_t* wanderingEquipId = (int32_t*)Row;
+	Row += Bytes4;
+	float* weight = (float*)Row;
+	Row += Bytes4;
+	float* weaponWeightRate = (float*)Row;
+	Row += Bytes4;
+	int32_t* fixPrice = (int32_t*)Row;
+	Row += Bytes4;
+	int32_t* basicPrice = (int32_t*)Row;
+	Row += Bytes4;
+	int32_t* sellValue = (int32_t*)Row;
+	Row += Bytes4;
+	float* correctStrength = (float*)Row;
+	Row += Bytes4;
+	float* correctAgility = (float*)Row;
+	Row += Bytes4;
+	float* corretMagic = (float*)Row;
+	Row += Bytes4;
+	float* corretFaith = (float*)Row;
+	Row += Bytes4;
+	float* physGuardCutRate = (float*)Row;
+	Row += Bytes4;
+	float* magGuardCutRate = (float*)Row;
+	Row += Bytes4;
+	float* fireGuardCutRate = (float*)Row;
+	Row += Bytes4;
+	float* thunGuardCutRate = (float*)Row;
+	Row += Bytes4;
+	int32_t* spEffectBehaviorId0 = (int32_t*)Row;
+	Row += Bytes4;
+	int32_t* spEffectBehaviorId1 = (int32_t*)Row;
+	Row += Bytes4;
+	int32_t* spEffectBehaviorId2 = (int32_t*)Row;
+	Row += Bytes4;
+	int32_t* residentSpEffectId0 = (int32_t*)Row;
+	Row += Bytes4;
+	int32_t* residentSpEffectId1 = (int32_t*)Row;
+	Row += Bytes4;
+	int32_t* residentSpEffectId2 = (int32_t*)Row;
+	Row += Bytes4;
+	int32_t* materialSetId = (int32_t*)Row;
+	Row += Bytes4;
+	int32_t* originEquipWep0 = (int32_t*)Row;
+	Row += Bytes4;
+	int32_t* originEquipWep1 = (int32_t*)Row;
+	Row += Bytes4;
+	int32_t* originEquipWep2 = (int32_t*)Row;
+	Row += Bytes4;
+	int32_t* originEquipWep3 = (int32_t*)Row;
+	Row += Bytes4;
+	int32_t* originEquipWep4 = (int32_t*)Row;
+	Row += Bytes4;
+	int32_t* originEquipWep5 = (int32_t*)Row;
+	Row += Bytes4;
+	int32_t* originEquipWep6 = (int32_t*)Row;
+	Row += Bytes4;
+	int32_t* originEquipWep7 = (int32_t*)Row;
+	Row += Bytes4;
+	int32_t* originEquipWep8 = (int32_t*)Row;
+	Row += Bytes4;
+	int32_t* originEquipWep9 = (int32_t*)Row;
+	Row += Bytes4;
+	int32_t* originEquipWep10 = (int32_t*)Row;
+	Row += Bytes4;
+	int32_t* originEquipWep11 = (int32_t*)Row;
+	Row += Bytes4;
+	int32_t* originEquipWep12 = (int32_t*)Row;
+	Row += Bytes4;
+	int32_t* originEquipWep13 = (int32_t*)Row;
+	Row += Bytes4;
+	int32_t* originEquipWep14 = (int32_t*)Row;
+	Row += Bytes4;
+	int32_t* originEquipWep15 = (int32_t*)Row;
+	Row += Bytes4;
+	float* antiDemonDamageRate = (float*)Row;
+	Row += Bytes4;
+	float* antUndeadDamageRate = (float*)Row;
+	Row += Bytes4;
+	float* antHollowDamageRate = (float*)Row;
+	Row += Bytes4;
+	float* antAbyssalDamageRate = (float*)Row;
+	Row += Bytes4;
+	int32_t* vagrantItemLotId = (int32_t*)Row;
+	Row += Bytes4;
+	int32_t* vagrantBonusEneDropItemLotId = (int32_t*)Row;
+	Row += Bytes4;
+	int32_t* vagrantItemEneDropItemLotId = (int32_t*)Row;
+	Row += Bytes4;
+	int16_t* equipModelId = (int16_t*)Row;
+	Row += Bytes2;
+	int16_t* iconId = (int16_t*)Row;
+	Row += Bytes2;
+	int16_t* durability = (int16_t*)Row;
+	Row += Bytes2;
+	int16_t* durailityMax = (int16_t*)Row;
+	Row += Bytes2;
+	int16_t* attackThrowEscape = (int16_t*)Row;
+	Row += Bytes2;
+	int16_t* parryDamageLife = (int16_t*)Row;
+	Row += Bytes2;
+	int16_t* atkBasePhysics = (int16_t*)Row;
+	Row += Bytes2;
+	int16_t* atkBaseMagic = (int16_t*)Row;
+	Row += Bytes2;
+	int16_t* atkBaseFire = (int16_t*)Row;
+	Row += Bytes2;
+	int16_t* atkBaseThunder = (int16_t*)Row;
+	Row += Bytes2;
+	int16_t* atkBaseStamina = (int16_t*)Row;
+	Row += Bytes2;
+	int16_t* saWeaponDamage = (int16_t*)Row;
+	Row += Bytes2;
+	int16_t* saDurability = (int16_t*)Row;
+	Row += Bytes2;
+	int16_t* guardAngle = (int16_t*)Row;
+	Row += Bytes2;
+	int16_t* staminaGuardDef = (int16_t*)Row;
+	Row += Bytes2;
+	int16_t* reinforceTypeId = (int16_t*)Row;
+	Row += Bytes2;
+	int16_t* trophySGradeId = (int16_t*)Row;
+	Row += Bytes2;
+	int16_t* trophySeqId = (int16_t*)Row;
+	Row += Bytes2;
+	int16_t* throwAtkRate = (int16_t*)Row;
+	Row += Bytes2;
+	int16_t* bowDistRate = (int16_t*)Row;
+	Row += Bytes2;
+	uint8_t* equipModelCategory = (uint8_t*)Row;
+	Row += Bytes1;
+	uint8_t* equipModelGender = (uint8_t*)Row;
+	Row += Bytes1;
+	uint8_t* weaponCategory = (uint8_t*)Row;
+	Row += Bytes1;
+	uint8_t* wepmotionCategory = (uint8_t*)Row;
+	Row += Bytes1;
+	uint8_t* guardmotionCategory = (uint8_t*)Row;
+	Row += Bytes1;
+	uint8_t* atkMaterial = (uint8_t*)Row;
+	Row += Bytes1;
+	uint8_t* defMaterial = (uint8_t*)Row;
+	Row += Bytes1;
+	uint8_t* defSfxMaterial = (uint8_t*)Row;
+	Row += Bytes1;
+	uint8_t* correctType = (uint8_t*)Row;
+	Row += Bytes1;
+	uint8_t* spAttribute = (uint8_t*)Row;
+	Row += Bytes1;
+	int16_t* spAtkCategory = (int16_t*)Row;
+	Row += Bytes2;
+	uint8_t* wepmotionOneHandId = (uint8_t*)Row;
+	Row += Bytes1;
+	uint8_t* wepmotionBothHandId = (uint8_t*)Row;
+	Row += Bytes1;
+	uint8_t* properStrength = (uint8_t*)Row;
+	Row += Bytes1;
+	uint8_t* properAgility = (uint8_t*)Row;
+	Row += Bytes1;
+	uint8_t* properMagic = (uint8_t*)Row;
+	Row += Bytes1;
+	uint8_t* properFaith = (uint8_t*)Row;
+	Row += Bytes1;
+	uint8_t* overStrength = (uint8_t*)Row;
+	Row += Bytes1;
+	uint8_t* attackBaseParry = (uint8_t*)Row;
+	Row += Bytes1;
+	uint8_t* defenseBaseParry = (uint8_t*)Row;
+	Row += Bytes1;
+	uint8_t* guardBaseRepel = (uint8_t*)Row;
+	Row += Bytes1;
+	uint8_t* attackBaseRepel = (uint8_t*)Row;
+	Row += Bytes1;
+	uint8_t* guardCutCancelRate = (uint8_t*)Row;
+	Row += Bytes1;
+	uint8_t* guardLevel = (uint8_t*)Row;
+	Row += Bytes1;
+	uint8_t* slashGuardCutRate = (uint8_t*)Row;
+	Row += Bytes1;
+	uint8_t* blowGuardCutRate = (uint8_t*)Row;
+	Row += Bytes1;
+	uint8_t* thrustGuardCutRate = (uint8_t*)Row;
+	Row += Bytes1;
+	uint8_t* poisonGuardResist = (uint8_t*)Row;
+	Row += Bytes1;
+	uint8_t* toxicGuardResist = (uint8_t*)Row;
+	Row += Bytes1;
+	uint8_t* bloodGuardResist = (uint8_t*)Row;
+	Row += Bytes1;
+	uint8_t* curseGuardResist = (uint8_t*)Row;
+	Row += Bytes1;
+	uint8_t* isDurabilityDivergence = (uint8_t*)Row;
+	Row += Bytes1;
+
+	Row += Bytes4; //Additional Offset to cut some not yet implemented fields
+	Row += Bytes1;
+
+	uint8_t* Unk6 = (uint8_t*)Row;
+	Row += Bytes1;
+	uint8_t* Unk7 = (uint8_t*)Row;
+	Row += Bytes1;
+	uint8_t* Unk8 = (uint8_t*)Row;
+	Row += Bytes1;
+	uint8_t* Unk9 = (uint8_t*)Row;
+	Row += Bytes1;
+	uint8_t* Unk10 = (uint8_t*)Row;
+	Row += Bytes1;
+	uint8_t* Unk11 = (uint8_t*)Row;
+	Row += Bytes1;
+	int32_t* Group0_AtkVfxId = (int32_t*)Row;
+	Row += Bytes4;
+	int32_t* Group0_DummyPolyId0 = (int32_t*)Row;
+	Row += Bytes4;
+	int32_t* Group0_DummyPolyId1 = (int32_t*)Row;
+	Row += Bytes4;
+	int32_t* Group1_AtkVfxId = (int32_t*)Row;
+	Row += Bytes4;
+	int32_t* Group1_DummyPolyId0 = (int32_t*)Row;
+	Row += Bytes4;
+	int32_t* Group1_DummyPolyId1 = (int32_t*)Row;
+	Row += Bytes4;
+	int32_t* Group2_AtkVfxId = (int32_t*)Row;
+	Row += Bytes4;
+	int32_t* Group2_DummyPolyId0 = (int32_t*)Row;
+	Row += Bytes4;
+	int32_t* Group2_DummyPolyId1 = (int32_t*)Row;
+	Row += Bytes4;
+	int32_t* Group3_AtkVfxId = (int32_t*)Row;
+	Row += Bytes4;
+	int32_t* Group3_DummyPolyId0 = (int32_t*)Row;
+	Row += Bytes4;
+	int32_t* Group3_DummyPolyId1 = (int32_t*)Row;
+	Row += Bytes4;
+	int32_t* Group4_AtkVfxId = (int32_t*)Row;
+	Row += Bytes4;
+	int32_t* Group4_DummyPolyId0 = (int32_t*)Row;
+	Row += Bytes4;
+	int32_t* Group4_DummyPolyId1 = (int32_t*)Row;
+	Row += Bytes4;
+	int32_t* Group5_AtkVfxId = (int32_t*)Row;
+	Row += Bytes4;
+	int32_t* Group5_DummyPolyId0 = (int32_t*)Row;
+	Row += Bytes4;
+	int32_t* Group5_DummyPolyId1 = (int32_t*)Row;
+	Row += Bytes4;
+	int32_t* Group6_AtkVfxId = (int32_t*)Row;
+	Row += Bytes4;
+	int32_t* Group6_DummyPolyId0 = (int32_t*)Row;
+	Row += Bytes4;
+	int32_t* Group6_DummyPolyId1 = (int32_t*)Row;
+	Row += Bytes4;
+	int32_t* Group7_AtkVfxId = (int32_t*)Row;
+	Row += Bytes4;
+	int32_t* Group7_DummyPolyId0 = (int32_t*)Row;
+	Row += Bytes4;
+	int32_t* Group7_DummyPolyId1 = (int32_t*)Row;
+	Row += Bytes4;
+	int16_t* materialVal0 = (int16_t*)Row;
+	Row += Bytes2;
+	int16_t* materialVal1 = (int16_t*)Row;
+	Row += Bytes2;
+	int32_t* wepAbsorpPosId = (int32_t*)Row;
+	Row += Bytes4;
+	float* Unk12 = (float*)Row;
+	Row += Bytes4;
+
+	Row += Bytes1; //Additional Offset to cut some not yet implemented fields
+
+	uint8_t* Unk21 = (uint8_t*)Row;
+	Row += Bytes1;
+	uint8_t* Unk22 = (uint8_t*)Row;
+	Row += Bytes1;
+	uint8_t* Unk23 = (uint8_t*)Row;
+	Row += Bytes1;
+	float* Unk24 = (float*)Row;
+	Row += Bytes4;
+	float* Unk25 = (float*)Row;
+	Row += Bytes4;
+	float* darkGuardCutRate = (float*)Row;
+	Row += Bytes4;
+	int16_t* atkBaseDark = (int16_t*)Row;
+	Row += Bytes2;
+	uint8_t* Unk26 = (uint8_t*)Row;
+	Row += Bytes1;
+	uint8_t* AtkThrowEscapeA = (uint8_t*)Row;
+	Row += Bytes1;
+	int32_t* swordArt_ActId = (int32_t*)Row;
+	Row += Bytes4;
+	uint8_t* AtkThrowEscapeB = (uint8_t*)Row;
+	Row += Bytes1;
+	uint8_t* Unk30 = (uint8_t*)Row;
+	Row += Bytes1;
+	uint8_t* Unk31 = (uint8_t*)Row;
+	Row += Bytes1;
+	uint8_t* MenuAdhoc = (uint8_t*)Row;
+	Row += Bytes1;
+	int32_t* swordArtId = (int32_t*)Row;
+	Row += Bytes4;
+	float* correctLuck = (float*)Row;
+	Row += Bytes4;
+	int32_t* reinforceWeaponId = (int32_t*)Row;
+	Row += Bytes4;
+	int16_t* Unk34 = (int16_t*)Row;
+	Row += Bytes2;
+	int16_t* displayTypeId = (int16_t*)Row;
+	Row += Bytes2;
+	float* CalcCorrectVal0 = (float*)Row;
+	Row += Bytes4;
+	float* CalcCorrectVal1 = (float*)Row;
+	Row += Bytes4;
+	float* CalcCorrectVal2 = (float*)Row;
+	Row += Bytes4;
+	float* CalcCorrectVal3 = (float*)Row;
+	Row += Bytes4;
+	float* CalcCorrectVal4 = (float*)Row;
+	Row += Bytes4;
+	float* CalcCorrectVal5 = (float*)Row;
+	Row += Bytes4;
+	float* CalcCorrectVal6 = (float*)Row;
+	Row += Bytes4;
+	float* CalcCorrectVal7 = (float*)Row;
+	Row += Bytes4;
+	float* CalcCorrectVal8 = (float*)Row;
+	Row += Bytes4;
+	float* CalcCorrectVal9 = (float*)Row;
+	Row += Bytes4;
+	float* CalcCorrectVal10 = (float*)Row;
+	Row += Bytes4;
+	int32_t* weaponVfx0 = (int32_t*)Row;
+	Row += Bytes4;
+	int32_t* weaponVfx1 = (int32_t*)Row;
+	Row += Bytes4;
+	int32_t* weaponVfx2 = (int32_t*)Row;
+	Row += Bytes4;
+	int32_t* weaponVfx3 = (int32_t*)Row;
+	Row += Bytes4;
+	int32_t* weaponVfx4 = (int32_t*)Row;
+	Row += Bytes4;
+	int32_t* weaponVfx5 = (int32_t*)Row;
+	Row += Bytes4;
+	int32_t* weaponVfx6 = (int32_t*)Row;
+	Row += Bytes4;
+	int32_t* weaponVfx7 = (int32_t*)Row;
+	Row += Bytes4;
+	float* StaminaConsumeRate = (float*)Row;
+	Row += Bytes4;
+	float* Unk48 = (float*)Row;
+	Row += Bytes4;
+	float* Unk49 = (float*)Row;
+	Row += Bytes4;
+	float* Unk50 = (float*)Row;
+	Row += Bytes4;
+	float* Unk51 = (float*)Row;
+	Row += Bytes4;
+	float* Unk52 = (float*)Row;
+	Row += Bytes4;
+	float* Unk53 = (float*)Row;
+	Row += Bytes4;
+	float* Unk54 = (float*)Row;
+	Row += Bytes4;
+	float* Unk55 = (float*)Row;
+	Row += Bytes4;
+	float* Unk56 = (float*)Row;
+	Row += Bytes4;
+	float* Unk57 = (float*)Row;
+	Row += Bytes4;
+	float* Unk58 = (float*)Row;
+	Row += Bytes4;
+	float* Unk59 = (float*)Row;
+	Row += Bytes4;
+	float* Unk60 = (float*)Row;
+	Row += Bytes4;
+	float* attackElementCorrectId = (float*)Row;
+	Row += Bytes4;
+	float* shopPrice = (float*)Row;
+	Row += Bytes4;
+	uint8_t* Unk62 = (uint8_t*)Row;
+	Row += Bytes1;
+	uint8_t* MaxNum = (uint8_t*)Row;
+	Row += Bytes1;
+
+	Row += Bytes1; //Additional Offset to cut some not yet implemented fields
+
+	uint8_t* Unk65 = (uint8_t*)Row;
+	Row += Bytes1;
+	int32_t* Unk66 = (int32_t*)Row;
+	Row += Bytes4;
+	int16_t* SpEff9600 = (int16_t*)Row;
+	Row += Bytes2;
+
+	int16_t oldSpspAtkCategory = *spAtkCategory;
+
+	EquipParamWeaponSwapper(spAtkCategory, oldSpspAtkCategory, TriggerSpeffectID, TargetspAtkCategory);
+
+	std::this_thread::sleep_for(std::chrono::seconds(1000));
+
+}
+
+void EquipParamWeaponSwapper(int16_t* spAtkCategory, int16_t oldSpspAtkCategory, int TriggerSpeffectID, int TargetspAtkCategory) {
+	unsigned int Timer = 0;
+	while (Timer < 15) {
+		while (isSpeffectActive(TriggerSpeffectID) == true) {
+			if (*spAtkCategory != TargetspAtkCategory) {
+				*spAtkCategory = TargetspAtkCategory;
+			}
+			Timer = 0;
+			std::this_thread::sleep_for(std::chrono::seconds(4));
+		}
+		if (*spAtkCategory != oldSpspAtkCategory) {
+			*spAtkCategory = oldSpspAtkCategory;
+		}
+		std::this_thread::sleep_for(std::chrono::seconds(4));
+		Timer += 1;
+	}
+	std::cout << "EquipParamWeaponSwapper - Expired \n";
+}
+
 void MainLoop() {
 	while (true) {
 		std::this_thread::sleep_for(std::chrono::seconds(4));
@@ -137,6 +664,11 @@ void MainLoop() {
 			if (*fp < *basemaxfp) {
 				FPstaminaDrain(stamina, maxstamina, fp, basemaxfp);
 			}
+		}
+		if (isSpeffectActive(2100) == true and MovesetSwap1 == false) {
+			std::cout << "startmemeswap";
+			std::thread MovesetSwap (MovesetSwap, 1500, 6100000, 2100, 193);
+			MovesetSwap.detach();
 		}
 	}
 }
@@ -431,6 +963,7 @@ int NGDifficulty(int RowOffset, float NGMultiplier, int DifficultyLevel) {
 }
 
 unsigned int* GetPointer(bool PointerValid, int PointerName) {
+	long long Param = 0x144782838;
 	long long BaseB = 0x144768E78;
 	long long BaseA = 0x144740178;
 	int XA = 0x1F90;
@@ -467,7 +1000,7 @@ unsigned int* GetPointer(bool PointerValid, int PointerName) {
 	}
 	else if (PointerName == PointerClearCountCorrectParam) {
 		while (Address == nullptr) {
-			Address = mlp<unsigned int>((void*)0x144782838, 0x17C8, 0x68, 0x68, 0x0);
+			Address = mlp<unsigned int>((void*)Param, 0x17C8, 0x68, 0x68, 0x0);
 			if (PointerValid == false) { break; }
 		}
 	}
@@ -489,6 +1022,12 @@ unsigned int* GetPointer(bool PointerValid, int PointerName) {
 			if (PointerValid == false) { break; }
 		}
 	}
+	else if (PointerName == PointerEquipParamWeapon) {
+		while (Address == nullptr) {
+			Address = mlp<unsigned int>((void*)Param, 0x70, 0x68, 0x68, 0x0);
+			if (PointerValid == false) { break; }
+		}
+	}
 
 
 	return Address;
@@ -503,7 +1042,6 @@ bool isSpeffectActive(int Speffect) {
 	while (*(long long*)SpeffectAddress != 0) {
 
 		if (*(unsigned int*)(*(long long*)SpeffectAddress + (byte*)SpeffectOffset2) == Speffect) {
-			std::cout << "isSpeffectActive() - Speffect: " << std::dec << Speffect << " found" << std::endl;
 			return true;
 		}
 
