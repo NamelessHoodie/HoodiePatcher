@@ -561,9 +561,13 @@ std::tuple<int16_t*, int16_t> EquipParamWeapon(int EquipParamWeaponRowID) {
 }
 
 void EquipParamWeaponSwapper(int InfusionRange, int EquipParamWeaponRowID, int TriggerSpeffectID, int TargetspAtkCategory) {
+
+	MovesetSwap1 = true;
+
 	if (InfusionRange > 1500) {
-		return;
 		std::cout << "EquipParamWeaponSwapper() - Critical error - Specified Infusionrange for " << EquipParamWeaponRowID << " is higher than maximum implemented, 1500 is the highest\nto fix this error decrease it.";
+		MovesetSwap1 = false;
+		return;
 	}
 
 	int16_t* spAtkCategory0000 = nullptr;
@@ -862,7 +866,8 @@ void EquipParamWeaponSwapper(int InfusionRange, int EquipParamWeaponRowID, int T
 		}
 	}
 
-	std::this_thread::sleep_for(std::chrono::seconds(1));
+	MovesetSwap1 = false;
+
 }
 
 void MainLoop() {
@@ -879,11 +884,11 @@ void MainLoop() {
 				FPstaminaDrain(stamina, maxstamina, fp, basemaxfp);
 			}
 		}
-		/*if (isSpeffectActive(2100) == true and MovesetSwap1 == false) {
-			std::cout << "startmemeswap";
+		if (isSpeffectActive(2100) == true and MovesetSwap1 == false) {
+			std::cout << "StartWepParamSwap \n";
 			std::thread MovesetSwap1(EquipParamWeaponSwapper, 1500, 6100000, 2100, 193);
 			MovesetSwap1.detach();
-		}*/
+		}
 	}
 }
 
