@@ -19,7 +19,7 @@ HkObjects limit extender:
 This is also pretty self explanatory, it extends the behbnd Hkobject limit in behbnd.
 
 # Thank You
-[Nordgaren](https://github.com/Nordgaren) for patching HoodiePatcher after 1.15.1.  
+[Nordgaren](https://github.com/Nordgaren) for patching HoodiePatcher after 1.15.1 patch hit.   
 
 # Patreon
 If you would like to contribute to this project consider becoming my patron
