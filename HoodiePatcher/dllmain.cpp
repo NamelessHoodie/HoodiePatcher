@@ -13,6 +13,8 @@ int NGDifficulty(int RowOffset, float NGMultiplier, int DifficultyLevel);
 
 int DifficultyModule();
 
+bool GetImageInfo();
+
 int StaticAddressPatcher();
 
 
@@ -38,6 +40,8 @@ DWORD WINAPI MainThread(HMODULE hModule)
 		std::cout << "HoodiePatcher - Debug Log == Enabled" << std::endl << std::endl;
 	}
 	else { std::cout << "HoodiePatcher - Debug Log == Disabled" << std::endl << std::endl; }
+
+	GetImageInfo();
 
 	StaticAddressPatcher();
 
@@ -117,31 +121,60 @@ bool IsParamLoaded()
 	return mlp<uintptr_t>((void*)0x144782838, 0x17C8, 0x68, 0x68, 0x0) != nullptr;
 }
 
+HMODULE _moduleHandle = nullptr;
+void* _baseAddress = nullptr;
+size_t _imageSize = 0;
+
+bool GetImageInfo() {
+
+	bool bSuccess = false;
+
+	_moduleHandle = GetModuleHandleA("DarkSoulsIII.exe");
+	if (_moduleHandle) {
+		MEMORY_BASIC_INFORMATION memInfo;
+		if (VirtualQuery((void*)_moduleHandle, &memInfo, sizeof(memInfo)) != 0) {
+			IMAGE_DOS_HEADER* hDos = (IMAGE_DOS_HEADER*)_moduleHandle;
+			IMAGE_NT_HEADERS* hPe = (IMAGE_NT_HEADERS*)((ULONG64)memInfo.AllocationBase + (ULONG64)hDos->e_lfanew);
+
+			if ((hDos->e_magic == IMAGE_DOS_SIGNATURE) && (hPe->Signature == IMAGE_NT_SIGNATURE)) {
+				bSuccess = true;
+				_baseAddress = (void*)memInfo.AllocationBase;
+				_imageSize = (SIZE_T)hPe->OptionalHeader.SizeOfImage;
+			}
+		}
+	}
+
+	return bSuccess;
+};
+
 int StaticAddressPatcher() {
 
 	std::cout << "StaticAddressPatcher - Start" << std::endl << std::endl;
 
 	DWORD oldProtect;
 	std::cout << "Patching... MaximumHkobjects" << std::endl;
-	if (!VirtualProtect((LPVOID)0x140F09A52, 4, PAGE_EXECUTE_READWRITE, &oldProtect))
+	char *maximumHkobjects = ((char *)_baseAddress + 0xF178F2);
+	if (!VirtualProtect(maximumHkobjects, 4, PAGE_EXECUTE_READWRITE, &oldProtect))
 		return true;
-	*(unsigned int*)0x140F09A52 = GetPrivateProfileIntW(L"Misc", L"MaximumHkobjects", 8192, L".\\HoodiePatcher.ini");
-	VirtualProtect((LPVOID)0x140F09A52, 4, oldProtect, &oldProtect);
-	std::cout << "MaximumHkojbects = " << *(unsigned int*)0x140F09A52 << std::endl << std::endl;
+	*(unsigned int*)maximumHkobjects = GetPrivateProfileIntW(L"Misc", L"MaximumHkobjects", 8192, L".\\HoodiePatcher.ini");
+	VirtualProtect((LPVOID)maximumHkobjects, 4, oldProtect, &oldProtect);
+	std::cout << "MaximumHkojbects = " << *(unsigned int*)maximumHkobjects << std::endl << std::endl;
 
 	std::cout << "Patching... EnableDebugAnimSpeedPlayer" << std::endl;
-	if (!VirtualProtect((LPVOID)0x144768F85, 1, PAGE_EXECUTE_READWRITE, &oldProtect))
+	char* enableDebugAnimSpeedPlayer = ((char*)_baseAddress + 0x4768F85);
+	if (!VirtualProtect((LPVOID)enableDebugAnimSpeedPlayer, 1, PAGE_EXECUTE_READWRITE, &oldProtect))
 		return true;
-	*(unsigned char*)0x144768F85 = GetPrivateProfileIntW(L"Misc", L"EnableDebugAnimSpeedPlayer", 0, L".\\HoodiePatcher.ini");
-	VirtualProtect((LPVOID)0x144768F85, 1, oldProtect, &oldProtect);
-	std::cout << "DebugAnimSpeedPlayer = " << *(unsigned int*)0x144768F85 << std::endl << std::endl;
+	*(unsigned char*)enableDebugAnimSpeedPlayer = GetPrivateProfileIntW(L"Misc", L"EnableDebugAnimSpeedPlayer", 0, L".\\HoodiePatcher.ini");
+	VirtualProtect((LPVOID)enableDebugAnimSpeedPlayer, 1, oldProtect, &oldProtect);
+	std::cout << "DebugAnimSpeedPlayer = " << *(unsigned int*)enableDebugAnimSpeedPlayer << std::endl << std::endl;
 
 	std::cout << "Patching... EnableDebugAnimSpeedEnemy" << std::endl;
-	if (!VirtualProtect((LPVOID)0x144768F81, 1, PAGE_EXECUTE_READWRITE, &oldProtect))
+	char* enableDebugAnimSpeedEnemy = ((char*)_baseAddress + 0x4768F81);
+	if (!VirtualProtect((LPVOID)enableDebugAnimSpeedEnemy, 1, PAGE_EXECUTE_READWRITE, &oldProtect))
 		return true;
-	*(unsigned char*)0x144768F81 = GetPrivateProfileIntW(L"Misc", L"EnableDebugAnimSpeedEnemy", 0, L".\\HoodiePatcher.ini");
-	VirtualProtect((LPVOID)0x144768F81, 1, oldProtect, &oldProtect);
-	std::cout << "DebugAnimSpeedEnemy = " << *(unsigned int*)0x144768F81 << std::endl << std::endl;
+	*(unsigned char*)enableDebugAnimSpeedEnemy = GetPrivateProfileIntW(L"Misc", L"EnableDebugAnimSpeedEnemy", 0, L".\\HoodiePatcher.ini");
+	VirtualProtect((LPVOID)enableDebugAnimSpeedEnemy, 1, oldProtect, &oldProtect);
+	std::cout << "DebugAnimSpeedEnemy = " << *(unsigned int*)enableDebugAnimSpeedEnemy << std::endl << std::endl;
 
 	std::cout << "StaticAddressPatcher - End" << std::endl << std::endl;
 
