@@ -116,11 +116,6 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReserv
 	return TRUE;
 }
 
-bool IsParamLoaded()
-{
-	return mlp<uintptr_t>((void*)0x144782838, 0x17C8, 0x68, 0x68, 0x0) != nullptr;
-}
-
 HMODULE _moduleHandle = nullptr;
 void* _baseAddress = nullptr;
 size_t _imageSize = 0;
@@ -146,6 +141,11 @@ bool GetImageInfo() {
 
 	return bSuccess;
 };
+
+bool IsParamLoaded()
+{
+	return mlp<uintptr_t>(((char*)_baseAddress + 0x4798118), 0x17C8, 0x68, 0x68, 0x0) != nullptr;
+}
 
 int StaticAddressPatcher() {
 
@@ -198,7 +198,7 @@ int DifficultyModule() {
 	int DifficultyLevel = GetPrivateProfileIntW(L"Difficulty", L"DifficultyLevel", 0, L".\\HoodiePatcher.ini");
 	std::cout << "Difficulty level = " << DifficultyLevel << std::endl << std::endl;
 
-	unsigned int* ClearCountCorrectParam = mlp<unsigned int>((void*)0x144782838, 0x17C8, 0x68, 0x68, 0x0);
+	unsigned int* ClearCountCorrectParam = mlp<unsigned int>(((char*)_baseAddress + 0x4798118), 0x17C8, 0x68, 0x68, 0x0);
 	if (ClearCountCorrectParam != nullptr) {
 		std::cout << "NG0 Start" << std::endl;
 		NGDifficulty(NG0, 1.0F, DifficultyLevel);
@@ -226,7 +226,7 @@ int DifficultyModule() {
 
 int NGDifficulty(int RowOffset, float NGMultiplier, int DifficultyLevel) {
 
-	unsigned int* ClearCountCorrectParam = mlp<unsigned int>((void*)0x144782838, 0x17C8, 0x68, 0x68, 0x0);
+	unsigned int* ClearCountCorrectParam = mlp<unsigned int>(((char*)_baseAddress + 0x4798118), 0x17C8, 0x68, 0x68, 0x0);
 
 	float OffenseMultiplier = ((float)GetPrivateProfileIntW(L"Difficulty", L"EnemyOffenseMultiplier", 100, L".\\HoodiePatcher.ini") / (float)100);
 	float DefenseMultiplier = ((float)GetPrivateProfileIntW(L"Difficulty", L"EnemyDefenseMultiplier", 100, L".\\HoodiePatcher.ini") / (float)100);
