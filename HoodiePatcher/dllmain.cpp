@@ -1,4 +1,8 @@
 #define WIN32_LEAN_AND_MEAN             // Exclude rarely-used stuff from Windows headers
+#define SOLO_PARAM_REPOSITORY ((char*)_baseAddress + 0x4798118)
+#define MAX_HK_OBJECTS ((char *)_baseAddress + 0xF178F2)
+#define PLAYER_ENABLE_DEBUG_ANIM_SPEED ((char*)_baseAddress + 0x477FEB5)
+#define ENEMY_ENABLE_DEBUG_ANIM_SPEED ((char*)_baseAddress + 0x477FEB1)
 
 #include <windows.h>
 #include <TlHelp32.h>
@@ -144,7 +148,7 @@ bool GetImageInfo() {
 
 bool IsParamLoaded()
 {
-	return mlp<uintptr_t>(((char*)_baseAddress + 0x4798118), 0x17C8, 0x68, 0x68, 0x0) != nullptr;
+	return mlp<uintptr_t>(SOLO_PARAM_REPOSITORY, 0x17C8, 0x68, 0x68, 0x0) != nullptr;
 }
 
 int StaticAddressPatcher() {
@@ -153,28 +157,25 @@ int StaticAddressPatcher() {
 
 	DWORD oldProtect;
 	std::cout << "Patching... MaximumHkobjects" << std::endl;
-	char *maximumHkobjects = ((char *)_baseAddress + 0xF178F2);
-	if (!VirtualProtect(maximumHkobjects, 4, PAGE_EXECUTE_READWRITE, &oldProtect))
+	if (!VirtualProtect(MAX_HK_OBJECTS, 4, PAGE_EXECUTE_READWRITE, &oldProtect))
 		return true;
-	*(unsigned int*)maximumHkobjects = GetPrivateProfileIntW(L"Misc", L"MaximumHkobjects", 8192, L".\\HoodiePatcher.ini");
-	VirtualProtect((LPVOID)maximumHkobjects, 4, oldProtect, &oldProtect);
-	std::cout << "MaximumHkojbects = " << *(unsigned int*)maximumHkobjects << std::endl << std::endl;
+	*(unsigned int*)MAX_HK_OBJECTS = GetPrivateProfileIntW(L"Misc", L"MaximumHkobjects", 8192, L".\\HoodiePatcher.ini");
+	VirtualProtect((LPVOID)MAX_HK_OBJECTS, 4, oldProtect, &oldProtect);
+	std::cout << "MaximumHkojbects = " << *(unsigned int*)MAX_HK_OBJECTS << std::endl << std::endl;
 
 	std::cout << "Patching... EnableDebugAnimSpeedPlayer" << std::endl;
-	char* enableDebugAnimSpeedPlayer = ((char*)_baseAddress + 0x4768F85);
-	if (!VirtualProtect((LPVOID)enableDebugAnimSpeedPlayer, 1, PAGE_EXECUTE_READWRITE, &oldProtect))
+	if (!VirtualProtect((LPVOID)PLAYER_ENABLE_DEBUG_ANIM_SPEED, 1, PAGE_EXECUTE_READWRITE, &oldProtect))
 		return true;
-	*(unsigned char*)enableDebugAnimSpeedPlayer = GetPrivateProfileIntW(L"Misc", L"EnableDebugAnimSpeedPlayer", 0, L".\\HoodiePatcher.ini");
-	VirtualProtect((LPVOID)enableDebugAnimSpeedPlayer, 1, oldProtect, &oldProtect);
-	std::cout << "DebugAnimSpeedPlayer = " << *(unsigned int*)enableDebugAnimSpeedPlayer << std::endl << std::endl;
+	*(unsigned char*)PLAYER_ENABLE_DEBUG_ANIM_SPEED = GetPrivateProfileIntW(L"Misc", L"EnableDebugAnimSpeedPlayer", 0, L".\\HoodiePatcher.ini");
+	VirtualProtect((LPVOID)PLAYER_ENABLE_DEBUG_ANIM_SPEED, 1, oldProtect, &oldProtect);
+	std::cout << "DebugAnimSpeedPlayer = " << *(unsigned int*)PLAYER_ENABLE_DEBUG_ANIM_SPEED << std::endl << std::endl;
 
 	std::cout << "Patching... EnableDebugAnimSpeedEnemy" << std::endl;
-	char* enableDebugAnimSpeedEnemy = ((char*)_baseAddress + 0x4768F81);
-	if (!VirtualProtect((LPVOID)enableDebugAnimSpeedEnemy, 1, PAGE_EXECUTE_READWRITE, &oldProtect))
+	if (!VirtualProtect((LPVOID)ENEMY_ENABLE_DEBUG_ANIM_SPEED, 1, PAGE_EXECUTE_READWRITE, &oldProtect))
 		return true;
-	*(unsigned char*)enableDebugAnimSpeedEnemy = GetPrivateProfileIntW(L"Misc", L"EnableDebugAnimSpeedEnemy", 0, L".\\HoodiePatcher.ini");
-	VirtualProtect((LPVOID)enableDebugAnimSpeedEnemy, 1, oldProtect, &oldProtect);
-	std::cout << "DebugAnimSpeedEnemy = " << *(unsigned int*)enableDebugAnimSpeedEnemy << std::endl << std::endl;
+	*(unsigned char*)ENEMY_ENABLE_DEBUG_ANIM_SPEED = GetPrivateProfileIntW(L"Misc", L"EnableDebugAnimSpeedEnemy", 0, L".\\HoodiePatcher.ini");
+	VirtualProtect((LPVOID)ENEMY_ENABLE_DEBUG_ANIM_SPEED, 1, oldProtect, &oldProtect);
+	std::cout << "DebugAnimSpeedEnemy = " << *(unsigned int*)ENEMY_ENABLE_DEBUG_ANIM_SPEED << std::endl << std::endl;
 
 	std::cout << "StaticAddressPatcher - End" << std::endl << std::endl;
 
@@ -198,7 +199,7 @@ int DifficultyModule() {
 	int DifficultyLevel = GetPrivateProfileIntW(L"Difficulty", L"DifficultyLevel", 0, L".\\HoodiePatcher.ini");
 	std::cout << "Difficulty level = " << DifficultyLevel << std::endl << std::endl;
 
-	unsigned int* ClearCountCorrectParam = mlp<unsigned int>(((char*)_baseAddress + 0x4798118), 0x17C8, 0x68, 0x68, 0x0);
+	unsigned int* ClearCountCorrectParam = mlp<unsigned int>(SOLO_PARAM_REPOSITORY, 0x17C8, 0x68, 0x68, 0x0);
 	if (ClearCountCorrectParam != nullptr) {
 		std::cout << "NG0 Start" << std::endl;
 		NGDifficulty(NG0, 1.0F, DifficultyLevel);
@@ -222,11 +223,9 @@ int DifficultyModule() {
 	}
 }
 
-
-
 int NGDifficulty(int RowOffset, float NGMultiplier, int DifficultyLevel) {
 
-	unsigned int* ClearCountCorrectParam = mlp<unsigned int>(((char*)_baseAddress + 0x4798118), 0x17C8, 0x68, 0x68, 0x0);
+	unsigned int* ClearCountCorrectParam = mlp<unsigned int>(SOLO_PARAM_REPOSITORY, 0x17C8, 0x68, 0x68, 0x0);
 
 	float OffenseMultiplier = ((float)GetPrivateProfileIntW(L"Difficulty", L"EnemyOffenseMultiplier", 100, L".\\HoodiePatcher.ini") / (float)100);
 	float DefenseMultiplier = ((float)GetPrivateProfileIntW(L"Difficulty", L"EnemyDefenseMultiplier", 100, L".\\HoodiePatcher.ini") / (float)100);
