@@ -16,10 +16,25 @@ DebugAnimSpeed Enabler:
 Pretty simple, it enables the homonymous TAE event.
 
 HkObjects limit extender:
-This is also pretty self explanatory, it extends the behbnd Hkobject limit in behbnd.
+This is also pretty self explanatory, it extends the behbnd Hkobject limit in behbnd(There seem to be ulterior limititations yet to be extended around here).
+
+# Hoodie's Catacombs
+Feel free to join, this is my discord server, you can contact me directly there, or just hang out.
+invite link [Hoodie's Catacombs](https://discord.gg/Bp3S8262q7)
 
 # Thank You
-[Nordgaren](https://github.com/Nordgaren) for patching HoodiePatcher after 1.15.1 patch hit.   
+[My patrons]
+Thank you for the continued support.
+
+[horkrux, loki, was421(Church Guard), pav, sfix and inunorii] 
+(If I forgot someone make sure to nag me about it) 
+Addresses/help used in the release of the original version.
+
+[Nordgaren] Make sure to check out his work at [Nordgaren's Github](https://github.com/Nordgaren).
+Patching HoodiePatcher after 1.15.1 patch hit - HoodiePatcher Release v1.1.0.0. 
+
+[?ServerName?] 
+Modding community I am part of, HoodiePatcher was originally made to help friends there, [Invite to the Discord Server](https://discord.gg/TpFmh8MDR9).
 
 # Patreon
 If you would like to contribute to this project consider becoming my patron
