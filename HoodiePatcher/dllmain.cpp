@@ -12,6 +12,7 @@
 #include "dinput8/dinputWrapper.h"
 #include "MinHook/include/MinHook.h"
 #include <iostream>
+#include <filesystem>
 #include "dllmain.h"
 
 int NGDifficulty(int RowOffset, float NGMultiplier, int DifficultyLevel);
@@ -27,6 +28,38 @@ tDirectInput8Create oDirectInput8Create;
 const LPCWSTR AppWindowTitle = L"DARK SOULS III";
 HWND g_hWnd = NULL;
 
+namespace
+{
+    void DummyFunction()
+    {
+    }
+};
+
+static std::filesystem::path GetPatcherDllDirectory()
+{
+    // Gets the dll path based on the location of a static function
+    // This code was pulled from DS3OS made by TLeonardUk
+    // https://github.com/TLeonardUK/ds3os/blob/df53f99498aa8e502810f61822ef6fa17ed326ef/Source/Injector/Injector/Injector.cpp#L65
+    // For more information read here:
+    // https://stackoverflow.com/a/6924332
+    HMODULE moduleHandle = nullptr;
+    wchar_t modulePath[MAX_PATH] = {};
+    if (GetModuleHandleExA(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS | GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT, (LPCSTR)&DummyFunction, &moduleHandle) == 0)
+    {
+        std::cout << "Failed to get dll handle" << std::endl;
+    }
+    if (GetModuleFileNameW(moduleHandle, modulePath, sizeof(modulePath)) == 0)
+    {
+        std::cout << "Failed to get dll path" << std::endl;
+    }
+    std::wstring modulePathWide = modulePath;
+    std::filesystem::path dllPath = modulePathWide;
+    return dllPath.parent_path();
+}
+
+std::filesystem::path dllDir = GetPatcherDllDirectory();
+std::filesystem::path configPath = dllDir / std::filesystem::path("HoodiePatcher.ini");
+
 DWORD WINAPI MainThread(HMODULE hModule)
 {
   //delay patching process
@@ -35,7 +68,7 @@ DWORD WINAPI MainThread(HMODULE hModule)
 
   MH_Initialize();
 
-  if (GetPrivateProfileIntW(L"Debug", L"HoodiePatcherDebugLog", 0, L".\\HoodiePatcher.ini") == 1) {
+  if (GetPrivateProfileIntW(L"Debug", L"HoodiePatcherDebugLog", 0, configPath.wstring().c_str()) == 1) {
     FILE* fp;
     AllocConsole();
     SetConsoleTitleA("HoodiePatcher - Debug Log");
@@ -61,21 +94,16 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReserv
   static HMODULE dinput8dll = nullptr;
   HMODULE chainModule = NULL;
   wchar_t chainPath[MAX_PATH];
-  wchar_t dllPath[MAX_PATH];
 
   switch (ul_reason_for_call)
   {
   case DLL_PROCESS_ATTACH:
 
-    GetPrivateProfileStringW(L"Misc", L"ChainloadDinput8dll", L"", chainPath, MAX_PATH, L".\\HoodiePatcher.ini");
-
+    GetPrivateProfileStringW(L"Misc", L"ChainloadDinput8dll", L"", chainPath, MAX_PATH, configPath.wstring().c_str());
     if (chainPath && wcscmp(chainPath, L""))
     {
-      GetCurrentDirectoryW(MAX_PATH, dllPath);
-      wcscat_s(dllPath, MAX_PATH, L"\\");
-      wcscat_s(dllPath, MAX_PATH, chainPath);
-      chainModule = LoadLibraryW(dllPath);
-
+      std::filesystem::path chainedDllPath = dllDir / std::filesystem::path(chainPath);
+      chainModule = LoadLibraryW(chainedDllPath.wstring().c_str());
       if (chainModule)
       {
         oDirectInput8Create = (tDirectInput8Create)GetProcAddress(chainModule, "DirectInput8Create");
@@ -84,10 +112,8 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReserv
 
     if (!chainModule)
     {
-      wchar_t path[MAX_PATH];
-      GetSystemDirectoryW(path, MAX_PATH);
-      wcscat_s(path, MAX_PATH, L"\\dinput8.dll");
-      dinput8dll = LoadLibraryW(path);
+      std::filesystem::path dinput8DllPath = dllDir / std::filesystem::path("dinput8.dll");
+      dinput8dll = LoadLibraryW(dinput8DllPath.wstring().c_str());
 
       if (dinput8dll)
       {
@@ -158,21 +184,21 @@ int StaticAddressPatcher() {
   std::cout << "Patching... MaximumHkobjects" << std::endl;
   if (!VirtualProtect(MAX_HK_OBJECTS, 4, PAGE_EXECUTE_READWRITE, &oldProtect))
     return true;
-  *(unsigned int*)MAX_HK_OBJECTS = GetPrivateProfileIntW(L"Misc", L"MaximumHkobjects", 8192, L".\\HoodiePatcher.ini");
+  *(unsigned int*)MAX_HK_OBJECTS = GetPrivateProfileIntW(L"Misc", L"MaximumHkobjects", 8192, configPath.wstring().c_str());
   VirtualProtect((LPVOID)MAX_HK_OBJECTS, 4, oldProtect, &oldProtect);
   std::cout << "MaximumHkojbects = " << *(unsigned int*)MAX_HK_OBJECTS << std::endl << std::endl;
 
   std::cout << "Patching... EnableDebugAnimSpeedPlayer" << std::endl;
   if (!VirtualProtect((LPVOID)PLAYER_ENABLE_DEBUG_ANIM_SPEED, 1, PAGE_EXECUTE_READWRITE, &oldProtect))
     return true;
-  *(unsigned char*)PLAYER_ENABLE_DEBUG_ANIM_SPEED = GetPrivateProfileIntW(L"Misc", L"EnableDebugAnimSpeedPlayer", 0, L".\\HoodiePatcher.ini");
+  *(unsigned char*)PLAYER_ENABLE_DEBUG_ANIM_SPEED = GetPrivateProfileIntW(L"Misc", L"EnableDebugAnimSpeedPlayer", 0, configPath.wstring().c_str());
   VirtualProtect((LPVOID)PLAYER_ENABLE_DEBUG_ANIM_SPEED, 1, oldProtect, &oldProtect);
   std::cout << "DebugAnimSpeedPlayer = " << *(unsigned int*)PLAYER_ENABLE_DEBUG_ANIM_SPEED << std::endl << std::endl;
 
   std::cout << "Patching... EnableDebugAnimSpeedEnemy" << std::endl;
   if (!VirtualProtect((LPVOID)ENEMY_ENABLE_DEBUG_ANIM_SPEED, 1, PAGE_EXECUTE_READWRITE, &oldProtect))
     return true;
-  *(unsigned char*)ENEMY_ENABLE_DEBUG_ANIM_SPEED = GetPrivateProfileIntW(L"Misc", L"EnableDebugAnimSpeedEnemy", 0, L".\\HoodiePatcher.ini");
+  *(unsigned char*)ENEMY_ENABLE_DEBUG_ANIM_SPEED = GetPrivateProfileIntW(L"Misc", L"EnableDebugAnimSpeedEnemy", 0, configPath.wstring().c_str());
   VirtualProtect((LPVOID)ENEMY_ENABLE_DEBUG_ANIM_SPEED, 1, oldProtect, &oldProtect);
   std::cout << "DebugAnimSpeedEnemy = " << *(unsigned int*)ENEMY_ENABLE_DEBUG_ANIM_SPEED << std::endl << std::endl;
 
@@ -195,7 +221,7 @@ int DifficultyModule() {
     Sleep(100);
 
   std::cout << "Difficulty Module Start" << std::endl;
-  int DifficultyLevel = GetPrivateProfileIntW(L"Difficulty", L"DifficultyLevel", 0, L".\\HoodiePatcher.ini");
+  int DifficultyLevel = GetPrivateProfileIntW(L"Difficulty", L"DifficultyLevel", 0, configPath.wstring().c_str());
   std::cout << "Difficulty level = " << DifficultyLevel << std::endl << std::endl;
 
   unsigned int* ClearCountCorrectParam = mlp<unsigned int>(SOLO_PARAM_REPOSITORY, 0x17C8, 0x68, 0x68, 0x0);
@@ -226,8 +252,8 @@ int NGDifficulty(int RowOffset, float NGMultiplier, int DifficultyLevel) {
 
   unsigned int* ClearCountCorrectParam = mlp<unsigned int>(SOLO_PARAM_REPOSITORY, 0x17C8, 0x68, 0x68, 0x0);
 
-  float OffenseMultiplier = ((float)GetPrivateProfileIntW(L"Difficulty", L"EnemyOffenseMultiplier", 100, L".\\HoodiePatcher.ini") / (float)100);
-  float DefenseMultiplier = ((float)GetPrivateProfileIntW(L"Difficulty", L"EnemyDefenseMultiplier", 100, L".\\HoodiePatcher.ini") / (float)100);
+  float OffenseMultiplier = ((float)GetPrivateProfileIntW(L"Difficulty", L"EnemyOffenseMultiplier", 100, configPath.wstring().c_str()) / (float)100);
+  float DefenseMultiplier = ((float)GetPrivateProfileIntW(L"Difficulty", L"EnemyDefenseMultiplier", 100, configPath.wstring().c_str()) / (float)100);
 
   char* NG = ((char*)ClearCountCorrectParam + RowOffset);
   std::cout << "         ClearCountCorrectParam Pointer -> " << std::hex << (unsigned int*)ClearCountCorrectParam << std::endl;
