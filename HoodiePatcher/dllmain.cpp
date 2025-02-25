@@ -1,6 +1,6 @@
 #define WIN32_LEAN_AND_MEAN             // Exclude rarely-used stuff from Windows headers
 #define SOLO_PARAM_REPOSITORY ((char*)_baseAddress + 0x4798108)
-#define MAX_HK_OBJECTS ((char *)_baseAddress + 0xF258C2)
+#define MAX_HK_OBJECTS ((char *)_baseAddress + 0xF17A22)
 
 #define PLAYER_ENABLE_DEBUG_ANIM_SPEED ((char*)_baseAddress + 0x477FEB1)
 #define ENEMY_ENABLE_DEBUG_ANIM_SPEED ((char*)_baseAddress + 0x477FEAD)
